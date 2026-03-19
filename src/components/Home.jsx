@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react'
-import gsap from 'gsap'
+import gsap from 'gsap';
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { FaFileAlt, FaMagic, FaChartLine, FaShieldAlt } from 'react-icons/fa'
 
 const Home = () => {
 
+  gsap.registerPlugin(ScrollTrigger);
   const head1 = useRef(null);
   const sub1 = useRef(null);
   const box1 = useRef(null);
@@ -43,11 +45,22 @@ const Home = () => {
         opacity:0,
         duration:1.5
       })
+      gsap.to(".scroll-text", {
+        x: "-55%", // move less so full text stays visible
+        scrollTrigger: {
+          trigger: ".scroll-section",
+          start: "top top",
+          end: "bottom top",
+          scrub: true, // smooth scroll-linked animation
+          pin: true,   // optional: pins section
+        }
+      });
     })
     return ()=>ctx.revert();
   },[])
 
   return (
+    <>
     <div className='w-full h-[100vh] bg-black text-white p-[3vw]'>
       <div className='flex flex-row'>
         <div className='mt-[20vh] w-[65vw]'>
@@ -79,6 +92,16 @@ const Home = () => {
         </div>
       </div>
     </div>
+    <div className='page-2 w-full h-full bg-black text-white pt-[7vh] p-[3vw]'>
+      <div>
+        <div className="scroll-section w-full h-[100vh] overflow-hidden flex items-center">
+          <div className="scroll-text whitespace-nowrap text-[45vh] font-extrabold">
+            BUILD SMARTER
+          </div>
+        </div>
+      </div>
+    </div>
+    </>
   )
 }
 
