@@ -92,7 +92,7 @@ const Home = () => {
         </div>
       </div>
     </div>
-    <div className='page-2 w-full h-full bg-black text-white pt-[7vh] p-[3vw]'>
+    <div className='page-2 w-full h-full bg-black text-white pt-[7vh] p-[3vw] px-0'>
       <div>
         <div className="scroll-section w-full h-[100vh] overflow-hidden flex items-center">
           <div className="scroll-text whitespace-nowrap text-[45vh] font-extrabold">
