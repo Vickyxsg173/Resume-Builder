@@ -56,16 +56,16 @@ const Build = () => {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h2 className="text-3xl font-semibold mb-8 text-center text-gray-800">AI Resume Builder</h2>
+    <div className="p-6 w-full h-[100vh] pt-[7vh] bg-black">
+      <h2 className="text-3xl font-semibold mb-8 text-center text-white">AI Resume Builder</h2>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6 bg-white p-8 rounded-lg shadow-lg">
+      <form onSubmit={handleSubmit} className="flex border-2 border-gray-400 flex-col gap-6 bg-black p-8 rounded-lg max-w-3xl mx-auto shadow-lg">
         <input
           name="name"
           placeholder="Name"
           onChange={handleChange}
           required
-          className="border border-gray-300 rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+          className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <textarea
           name="summary"
@@ -73,33 +73,33 @@ const Build = () => {
           onChange={handleChange}
           required
           rows={4}
-          className="border border-gray-300 rounded-md px-4 py-2 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+          className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <input
           name="skills"
           placeholder="Skills (comma separated)"
           onChange={handleChange}
-          className="border border-gray-300 rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+          className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <textarea
           name="experience"
           placeholder="Experience"
           onChange={handleChange}
           rows={4}
-          className="border border-gray-300 rounded-md px-4 py-2 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+          className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <textarea
           name="projects"
           placeholder="Projects (comma separated)"
           onChange={handleChange}
           rows={3}
-          className="border border-gray-300 rounded-md px-4 py-2 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+          className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <input
           name="education"
           placeholder="Education"
           onChange={handleChange}
-          className="border border-gray-300 rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+          className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
 
         <button

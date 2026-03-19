@@ -48,7 +48,7 @@ const Home = () => {
   },[])
 
   return (
-    <div className='w-full h-[95vh] bg-black text-white p-[3vw]'>
+    <div className='w-full h-[100vh] bg-black text-white p-[3vw]'>
       <div className='flex flex-row'>
         <div className='mt-[20vh] w-[65vw]'>
           <h1 ref={head1} className='text-[10vh] w-full text-orange-600'>Build Your Future with AI-Powered Tools</h1>

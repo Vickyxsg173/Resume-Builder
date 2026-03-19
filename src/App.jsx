@@ -8,6 +8,7 @@ import Contact from "./components/Contact.jsx";
 import About from "./components/About.jsx";
 import Home from "./components/Home.jsx";
 import Profile from "./components/Profile.jsx";
+import InterviewPrep from "./components/InterviewPrep.jsx";
 import { BrowserRouter,Routes,Route,Link, useLocation } from "react-router-dom";
 
 function App(){
@@ -38,8 +39,8 @@ function App(){
 
     return(
         <>
-          <div>
-            <nav className="w-full h-[5vh] bg-black text-lg text-white flex flex-row justify-between items-center px-[3vw]">
+          <div className="">
+            <nav className="w-full fixed h-[5vh] bg-black text-lg text-white flex flex-row justify-between items-center px-[3vw]">
               <div ref={addtoref} className="flex flex-row items-center">
                 <span><FaClipboardUser size={20}/></span>
                 <h1 className="text-lg">ResumeBuild</h1>
@@ -47,6 +48,7 @@ function App(){
               <div className="flex flex-row gap-[2vw]">
                 <Link ref={addtoref} to="/">Home</Link>
                 <Link ref={addtoref} to="/Build">Build</Link>
+                <Link ref={addtoref} to="/InterviewPrep">InterviewPrep</Link>
                 <Link ref={addtoref} to="/Profile">Profile</Link>
                 <Link ref={addtoref} to="/Contact">Contact</Link>
                 <Link ref={addtoref} to="/Profile">Profile</Link>
@@ -58,6 +60,7 @@ function App(){
             <Routes>
               <Route path="/" element={<Home/>}/>
               <Route path="/Profile" element={<Profile/>}/>
+              <Route path="/InterviewPrep" element={<InterviewPrep/>}/>
               <Route path="/Contact" element={<Contact/>}/>
               <Route path="/Build" element={<Build/>}/>
               <Route path="/About" element={<Home/>}/>

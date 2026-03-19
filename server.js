@@ -78,16 +78,14 @@ Generate a polished, industry-ready resume.
     while (retries >= 0) {
       try {
         stream = await openrouter.chat.send({
-          chatGenerationParams: {
-            model: "openai/gpt-4o-mini",
-            messages: [
-              {
-                role: "user",
-                content: prompt,
-              },
-            ],
-            stream: true,
-          },
+          model: "openai/gpt-4o-mini",
+          messages: [
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          stream: true,
         });
         break; // success
       } catch (err) {
@@ -116,6 +114,69 @@ Generate a polished, industry-ready resume.
       success: false,
       message: "Something went wrong",
     });
+  }
+});
+
+app.get("/api/interview/start", async (req, res) => {
+  try {
+    const completion = await openrouter.chat.send({
+      chatGenerationParams: {
+        model: "openai/gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are a professional interviewer. Ask one technical interview question.",
+          },
+        ],
+      },
+    });
+
+    const question = completion.choices[0].message.content;
+
+    res.json({ question });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to start interview" });
+  }
+});
+
+app.post("/api/interview/answer", async (req, res) => {
+  const { question, answer } = req.body;
+
+  try {
+    const completion = await openrouter.chat.send({
+      chatGenerationParams: {
+        model: "openai/gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `
+You are an interviewer.
+
+- Evaluate the answer
+- Give feedback
+- Give score out of 10
+
+Respond clearly in plain text. Do NOT ask any follow-up or next question.
+            `,
+          },
+          {
+            role: "user",
+            content: `Question: ${question}\nAnswer: ${answer}`,
+          },
+        ],
+      },
+    });
+
+    const output = completion.choices[0].message.content;
+
+    res.json({
+      feedback: output,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Streaming failed" });
   }
 });
 
