@@ -49,7 +49,7 @@ function App(){
                 <Link ref={addtoref} to="/">Home</Link>
                 <Link ref={addtoref} to="/Build">Build</Link>
                 <Link ref={addtoref} to="/InterviewPrep">InterviewPrep</Link>
-                <Link ref={addtoref} to="/Profile">Profile</Link>
+                <Link ref={addtoref} to="/About">About</Link>
                 <Link ref={addtoref} to="/Contact">Contact</Link>
                 <Link ref={addtoref} to="/Profile">Profile</Link>
                 <h1 ref={addtoref}><MdLogout size={25}/></h1>
