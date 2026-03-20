@@ -9,6 +9,7 @@ import Contact from "./components/Contact.jsx";
 import About from "./components/About.jsx";
 import Home from "./components/Home.jsx";
 import Profile from "./components/Profile.jsx";
+import News from "./components/News.jsx";
 import InterviewPrep from "./components/InterviewPrep.jsx";
 import { BrowserRouter,Routes,Route,Link, useLocation } from "react-router-dom";
 
@@ -58,6 +59,7 @@ function App(){
                 <Link className="hover:text-orange-600" ref={addtoref} to="/">Home</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/Build">Build</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/InterviewPrep">InterviewPrep</Link>
+                <Link className="hover:text-orange-600" ref={addtoref} to="/News">News</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/About">About</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/Contact">Contact</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/Profile">Profile</Link>
@@ -74,6 +76,7 @@ function App(){
             <Routes>
               <Route path="/" element={<Home/>}/>
               <Route path="/Profile" element={<Profile/>}/>
+              <Route path="/News" element={<News/>}/>
               <Route path="/InterviewPrep" element={<InterviewPrep/>}/>
               <Route path="/Contact" element={<Contact/>}/>
               <Route path="/Build" element={<Build/>}/>

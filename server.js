@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { OpenRouter } from "@openrouter/sdk";
+import axios from "axios";
 
 dotenv.config();
 
@@ -177,6 +178,48 @@ Respond clearly in plain text. Do NOT ask any follow-up or next question.
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Streaming failed" });
+  }
+});
+
+
+app.get("/api/hn-news", async (req, res) => {
+  try {
+    // Step 1: Get top story IDs
+    const response = await axios.get(
+      "https://hacker-news.firebaseio.com/v0/topstories.json"
+    );
+
+    const ids = response.data;
+
+    // Step 2: Take first 5
+    const topIds = ids.slice(0, 50);
+
+    let news = [];
+
+    // Step 3: Fetch each story (simple loop)
+    for (let i = 0; i < topIds.length; i++) {
+      const story = await axios.get(
+        `https://hacker-news.firebaseio.com/v0/item/${topIds[i]}.json`
+      );
+
+      news.push({
+        title: story.data.title,
+        url:
+          story.data.url ||
+          `https://news.ycombinator.com/item?id=${topIds[i]}`,
+        author: story.data.by,
+      });
+    }
+
+    // Step 4: Send to frontend
+    res.json({
+      success: true,
+      news: news,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false });
   }
 });
 
