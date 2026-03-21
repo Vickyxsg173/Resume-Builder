@@ -18,6 +18,12 @@ function App(){
   itemsRef.current = [];
   const location = useLocation();
   const [openChat, setOpenChat] = useState(false);
+  const [messages, setMessages] = useState([
+    { role: "assistant", content: "Hello 👋 How can I help you?" }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const chatEndRef = useRef(null);
 
   const addtoref = (el)=>{
     if(el && !itemsRef.current.includes(el)){
@@ -46,6 +52,39 @@ function App(){
       return ()=>ctx.revert();
     }
   },[location.pathname])
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    const newMessages = [...messages, { role: "user", content: input }];
+    setMessages(newMessages);
+    setInput("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: newMessages }),
+      });
+
+      const data = await res.json();
+
+      const aiReply = data.choices?.[0]?.message?.content || "No response";
+
+      setMessages([...newMessages, { role: "assistant", content: aiReply }]);
+    } catch (err) {
+      console.error(err);
+    }
+
+    setLoading(false);
+  };
 
     return(
         <>
@@ -101,18 +140,46 @@ function App(){
               </div>
         
               {/* Chat Body */}
-              <div className="flex-1 p-3 overflow-y-auto text-black text-sm">
-                <p>Hello 👋 How can I help you?</p>
+              <div className="flex-1 p-3 overflow-y-auto text-black text-sm space-y-2">
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className={`p-2 rounded-md max-w-[80%] ${
+                      msg.role === "user"
+                        ? "bg-orange-500 text-white ml-auto"
+                        : "bg-gray-200 text-black"
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
+                ))}
+                {loading && (
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs">Typing</p>
+                    <div className="flex flex-row gap-1">
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-bounce"></div>
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-bounce [animation-delay:-.3s]"></div>
+                      <div className="w-2 h-2 rounded-full bg-red-500 animate-bounce [animation-delay:-.5s]"></div>
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
               </div>
         
               {/* Input */}
               <div className="p-2 border-t flex">
                 <input 
                   type="text" 
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   placeholder="Type a message..."
                   className="flex-1 border rounded-md px-2 py-1 text-black outline-none"
                 />
-                <button className="ml-2 bg-orange-500 text-white px-3 py-1 rounded-md hover:bg-orange-600">
+                <button
+                  onClick={sendMessage}
+                  className="ml-2 bg-orange-500 text-white px-3 py-1 rounded-md hover:bg-orange-600"
+                >
                   Send
                 </button>
               </div>

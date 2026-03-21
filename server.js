@@ -223,6 +223,60 @@ app.get("/api/hn-news", async (req, res) => {
   }
 });
 
+app.post("/api/chat", async (req, res) => {
+  const { messages } = req.body;
+
+  try {
+    const response = await axios.post(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        model: "openai/gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `You are an AI assistant built INTO this website. You MUST only help users using the features and tools available on THIS platform.
+
+CONTEXT OF THIS WEBSITE:
+- Name of website/webapp is ResumeBuild
+- Resume Builder (AI generates resumes from user input)
+- Interview Simulator (asks questions and evaluates answers)
+- AI Chat for career guidance
+- Tech News section (if asked source or authenticity it is powered by hackernews so legit)
+- Home,Build,InterviewPrep,News,About,Contact,Profile these are the pages in my website
+- Details to enter in build page to create resume -> name,summary,skills,experience,projects,education
+
+STRICT RULES:
+- DO NOT suggest or mention other websites, platforms, or external tools
+- DO NOT say "you can use other sites" or give alternatives outside this product
+- ALWAYS guide the user on how to use THIS website's features
+- If user asks about resumes → guide them to use the resume generator feature
+- If user asks about interview prep → guide them to the interview simulator
+- Keep answers practical and action-oriented within this platform
+
+TONE:
+- Helpful, product-focused, like an in-app assistant
+- Concise and clear
+
+Your goal is to make the user successfully use THIS website, not anything else.`
+          },
+          ...messages
+        ]
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
 // 🚀 Server Start
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
