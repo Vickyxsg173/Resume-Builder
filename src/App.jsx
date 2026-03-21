@@ -11,6 +11,8 @@ import Home from "./components/Home.jsx";
 import Profile from "./components/Profile.jsx";
 import News from "./components/News.jsx";
 import InterviewPrep from "./components/InterviewPrep.jsx";
+import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 import { BrowserRouter,Routes,Route,Link, useLocation } from "react-router-dom";
 
 function App(){
@@ -24,6 +26,8 @@ function App(){
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const chatEndRef = useRef(null);
+
+  const { t } = useTranslation();
 
   const addtoref = (el)=>{
     if(el && !itemsRef.current.includes(el)){
@@ -95,13 +99,34 @@ function App(){
                 <h1 className="text-lg">ResumeBuild</h1>
               </div>
               <div className="flex flex-row gap-[2vw]">
-                <Link className="hover:text-orange-600" ref={addtoref} to="/">Home</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/Build">Build</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/InterviewPrep">InterviewPrep</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/News">News</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/About">About</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/Contact">Contact</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/Profile">Profile</Link>
+                <Link className="hover:text-orange-600" ref={addtoref} to="/">{t("home")}</Link>
+                <Link className="hover:text-orange-600" ref={addtoref} to="/Build">{t("build")}</Link>
+                <Link className="hover:text-orange-600" ref={addtoref} to="/InterviewPrep">{t("interview")}</Link>
+                <Link className="hover:text-orange-600" ref={addtoref} to="/News">{t("news")}</Link>
+                <Link className="hover:text-orange-600" ref={addtoref} to="/About">{t("about")}</Link>
+                <Link className="hover:text-orange-600" ref={addtoref} to="/Contact">{t("contact")}</Link>
+                <Link className="hover:text-orange-600" ref={addtoref} to="/Profile">{t("profile")}</Link>
+                <div className="flex gap-2 items-center">
+                  <button
+                    onClick={() => {
+                      i18n.changeLanguage("en");
+                      localStorage.setItem("lang", "en");
+                    }}
+                    className="px-2 py-1 border rounded hover:bg-white hover:text-black transition"
+                  >
+                    EN
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      i18n.changeLanguage("hi");
+                      localStorage.setItem("lang", "hi");
+                    }}
+                    className="px-2 py-1 border rounded hover:bg-white hover:text-black transition"
+                  >
+                    HI
+                  </button>
+                </div>
                 <h1 ref={addtoref} className="cursor-pointer">
                   <MdLogout
                     className="hover:text-red-500 hover:scale-110 transition-all duration-200"
@@ -119,7 +144,7 @@ function App(){
               <Route path="/InterviewPrep" element={<InterviewPrep/>}/>
               <Route path="/Contact" element={<Contact/>}/>
               <Route path="/Build" element={<Build/>}/>
-              <Route path="/About" element={<Home/>}/>
+              <Route path="/About" element={<About/>}/>
             </Routes>
           </div>
           <div ref={aichat}
@@ -173,14 +198,14 @@ function App(){
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                  placeholder="Type a message..."
+                  placeholder={t("type_message")}
                   className="flex-1 border rounded-md px-2 py-1 text-black outline-none"
                 />
                 <button
                   onClick={sendMessage}
                   className="ml-2 bg-orange-500 text-white px-3 py-1 rounded-md hover:bg-orange-600"
                 >
-                  Send
+                  {t("send")}
                 </button>
               </div>
         
