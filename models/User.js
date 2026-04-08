@@ -32,6 +32,23 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
+  // 🔢 Usage Tracking
+  generationsUsed: {
+    type: Number,
+    default: 0,
+  },
+  generationLimit: {
+    type: Number,
+    default: 10, // Free tier: 10 resume generations
+  },
+  interviewsUsed: {
+    type: Number,
+    default: 0,
+  },
+  interviewLimit: {
+    type: Number,
+    default: 20, // Free tier: 20 interview sessions
+  },
   isAdmin: {
     type: Boolean,
     default: false,

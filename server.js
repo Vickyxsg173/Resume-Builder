@@ -210,6 +210,36 @@ app.post("/api/profile/resumes", ensureAuth, async (req, res) => {
   }
 });
 
+// 🗑️ Delete a saved resume
+app.delete("/api/profile/resumes/:resumeId", ensureAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    user.savedResumes = user.savedResumes.filter(
+      (r) => r._id.toString() !== req.params.resumeId
+    );
+    await user.save();
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete resume" });
+  }
+});
+
+// 💳 Get Credits Info
+app.get("/api/profile/credits", ensureAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    res.json({
+      isAdmin: user.isAdmin,
+      generationsUsed: user.generationsUsed,
+      generationLimit: user.isAdmin ? Infinity : user.generationLimit,
+      interviewsUsed: user.interviewsUsed,
+      interviewLimit: user.isAdmin ? Infinity : user.interviewLimit,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch credits" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 
 // 🔥 MAIN ROUTE
@@ -288,6 +318,11 @@ Return ONLY the final resume markdown text. Do not output any conversational fil
       success: true,
       resume: aiResume,
     });
+
+    // 📊 Track usage (non-blocking, only for logged-in users)
+    if (req.user) {
+      User.findByIdAndUpdate(req.user._id, { $inc: { generationsUsed: 1 } }).catch(() => {});
+    }
 
   } catch (error) {
     console.error("Error:", error);

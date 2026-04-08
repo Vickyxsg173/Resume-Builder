@@ -60,6 +60,10 @@ const Build = () => {
       const data = await response.json();
       if (data && data.resume) {
         setResume(data.resume);
+        // 🔖 Auto-save to profile if logged in
+        if (isAuthenticated && saveResume) {
+          saveResume(formData.name || 'Resume', data.resume).catch(() => {});
+        }
       } else {
         setResume("Error: Invalid response from server");
       }
