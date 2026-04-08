@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import html2pdf from "html2pdf.js";
+import { useAuth } from "../context/AuthContext";
+import { FaSave, FaDownload } from "react-icons/fa";
 
 const Build = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,17 @@ const Build = () => {
 
   const [resume, setResume] = useState("");
   const [loading, setLoading] = useState(false);
+  const [savingToProfile, setSavingToProfile] = useState(false);
+  const { user, isAuthenticated, saveResume } = useAuth();
+
+  useEffect(() => {
+    if (isAuthenticated && user?.skills?.length > 0 && !formData.skills) {
+      setFormData(prev => ({
+        ...prev,
+        skills: user.skills.join(", ")
+      }));
+    }
+  }, [isAuthenticated, user]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -68,6 +81,20 @@ const Build = () => {
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save();
+  };
+
+  const handleSaveToProfile = async () => {
+    if (!resume || !isAuthenticated) return;
+    setSavingToProfile(true);
+    try {
+      const title = `${formData.name || 'Resume'} - ${new Date().toLocaleDateString()}`;
+      await saveResume(title, resume);
+      alert("Resume saved to your profile!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save resume.");
+    }
+    setSavingToProfile(false);
   };
 
   return (
@@ -141,12 +168,21 @@ const Build = () => {
       {/* Output */}
       {resume && (
         <div className="mt-12 flex flex-col items-center pb-20">
-          <div className="w-full max-w-[21cm] flex justify-end mb-4">
+          <div className="w-full max-w-[21cm] flex justify-end gap-3 mb-4">
+            {isAuthenticated && (
+              <button
+                onClick={handleSaveToProfile}
+                disabled={savingToProfile}
+                className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-md shadow-md transition cursor-pointer flex items-center gap-2 disabled:opacity-50"
+              >
+                <FaSave /> {savingToProfile ? "Saving..." : "Save to Profile"}
+              </button>
+            )}
             <button
               onClick={downloadPDF}
-              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition cursor-pointer"
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition cursor-pointer flex items-center gap-2"
             >
-              Download PDF
+              <FaDownload /> Download PDF
             </button>
           </div>
           

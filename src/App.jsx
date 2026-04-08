@@ -94,50 +94,7 @@ function App(){
 
     return(
         <>
-          <div className="">
-            <nav className="z-30 w-full fixed bg-black text-lg text-white flex flex-row justify-between items-center px-[3vw] py-2">
-              <div ref={addtoref} className="flex flex-row items-center">
-                <span><FaClipboardUser size={20}/></span>
-                <h1 className="text-lg">ResumeBuild</h1>
-              </div>
-              <div className="flex flex-row gap-[2vw] items-center">
-                <Link className="hover:text-orange-600" ref={addtoref} to="/">{t("home")}</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/Build">{t("build")}</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/InterviewPrep">{t("interview")}</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/News">{t("news")}</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/About">{t("about")}</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/Contact">{t("contact")}</Link>
-                <Link className="hover:text-orange-600" ref={addtoref} to="/Profile">{t("profile")}</Link>
-                <div className="flex items-center gap-1 text-sm">
-                  <button
-                    onClick={() => {
-                      i18n.changeLanguage("en");
-                      localStorage.setItem("lang", "en");
-                    }}
-                    className={`px-2 py-[2px] border border-white rounded hover:bg-white hover:text-black transition leading-none ${i18n.language === 'en' ? 'bg-white text-black' : ''}`}
-                  >
-                    EN
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      i18n.changeLanguage("hi");
-                      localStorage.setItem("lang", "hi");
-                    }}
-                    className={`px-2 py-[2px] border border-white rounded hover:bg-white hover:text-black transition leading-none ${i18n.language === 'hi' ? 'bg-white text-black' : ''}`}
-                  >
-                    HI
-                  </button>
-                </div>
-                <h1 ref={addtoref} className="cursor-pointer">
-                  <MdLogout
-                    className="hover:text-red-500 hover:scale-110 transition-all duration-200"
-                    size={25}
-                  />
-                </h1>
-              </div>
-            </nav>
-          </div>
+      <Navbar addtoref={addtoref} />
           <div>
             <Routes>
               <Route path="/" element={<Home/>}/>

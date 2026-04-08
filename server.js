@@ -3,6 +3,15 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { OpenRouter } from "@openrouter/sdk";
 import axios from "axios";
+import mongoose from "mongoose";
+import passport from "passport";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import session from "express-session";
+import User from "./models/User.js";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
+import path from "path";
+const __dirname = path.resolve();
 
 dotenv.config();
 
@@ -11,8 +20,168 @@ const openrouter = new OpenRouter({
 });
 
 const app = express();
-app.use(cors());
+
+// 🔐 Security Headers
+app.use(helmet());
+app.set('trust proxy', 1);
+
+// 🔌 MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/resumeb')
+  .then(() => console.log('✅ MongoDB Connected'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
+// 🛡️ Middleware
+const isProduction = process.env.NODE_ENV === 'production';
+const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+app.use(cors({
+  origin: frontendUrl,
+  credentials: true
+}));
 app.use(express.json());
+
+// 🚦 Rate Limiting (Prevent AI Abuse)
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per window
+  message: "Too many requests from this IP, please try again after 15 minutes",
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.user && req.user.isAdmin, // 👑 Admin Bypass
+});
+
+// Apply limiter to expensive AI routes
+app.use("/generate-resume", apiLimiter);
+app.use("/api/chat", apiLimiter);
+app.use("/api/interview", apiLimiter);
+
+// 📦 Session Setup
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    httpOnly: true, // Prevents XSS from reading cookies
+    secure: isProduction, // Cookies only over HTTPS in production
+    sameSite: isProduction ? 'none' : 'lax' // CSRF protection
+  }
+}));
+
+// 🔑 Passport Setup (Conditional to prevent crash)
+app.use(passport.initialize());
+app.use(passport.session());
+
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/auth/google/callback"
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      const newUser = {
+        googleId: profile.id,
+        displayName: profile.displayName,
+        email: profile.emails[0].value,
+        image: profile.photos[0].value
+      };
+
+      try {
+        const adminEmails = (process.env.ADMIN_EMAILS || "").split(",");
+        const isAdmin = adminEmails.includes(profile.emails[0].value);
+        
+        let user = await User.findOne({ googleId: profile.id });
+        if (user) {
+          // Update admin status if it changed
+          user.isAdmin = isAdmin;
+          await user.save();
+          done(null, user);
+        } else {
+          user = await User.create({ ...newUser, isAdmin });
+          done(null, user);
+        }
+      } catch (err) {
+        console.error(err);
+        done(err, null);
+      }
+    }
+  ));
+} else {
+  console.warn("⚠️  WARNING: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing. Authentication will not work.");
+}
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});
+
+// 🚦 Auth Routes
+app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+app.get("/auth/google/callback", 
+  passport.authenticate("google", { failureRedirect: `${frontendUrl}/login` }),
+  (req, res) => {
+    res.redirect(frontendUrl);
+  }
+);
+
+app.get("/auth/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) return next(err);
+    res.status(200).json({ success: true });
+  });
+});
+
+app.get("/auth/user", (req, res) => {
+  if (req.user) {
+    res.json({ isAuthenticated: true, user: req.user });
+  } else {
+    res.json({ isAuthenticated: false });
+  }
+});
+
+// Profile & Customization Middleware
+const ensureAuth = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.status(401).json({ error: "Unauthorized" });
+};
+
+// 👤 Profile Routes
+app.get("/api/profile", ensureAuth, (req, res) => {
+  res.json(req.user);
+});
+
+app.patch("/api/profile/skills", ensureAuth, async (req, res) => {
+  try {
+    const { skills } = req.body;
+    const user = await User.findByIdAndUpdate(req.user._id, { skills }, { new: true });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update skills" });
+  }
+});
+
+app.post("/api/profile/resumes", ensureAuth, async (req, res) => {
+  try {
+    const { title, content } = req.body;
+    const user = await User.findById(req.user._id);
+    user.savedResumes.push({ title, content });
+    await user.save();
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to save resume" });
+  }
+});
 
 const PORT = 5000;
 
@@ -265,6 +434,16 @@ Your goal is to make the user successfully use THIS website, not anything else.`
 });
 
 // 🚀 Server Start
+
+
+// ✅ Serve Production Build (Unified Deployment)
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "dist")));
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "dist", "index.html"));
+  });
+}
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
