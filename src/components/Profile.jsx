@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
 import {
@@ -8,7 +9,7 @@ import {
   FaCalendarAlt, FaCheckCircle
 } from 'react-icons/fa';
 
-const StatCard = ({ icon, label, value, max, color }) => {
+const StatCard = ({ icon, label, value, max, color, remainingText }) => {
   const pct = max && max !== Infinity ? Math.min((value / max) * 100, 100) : 100;
   const isUnlimited = max === Infinity || max === null;
 
@@ -42,7 +43,7 @@ const StatCard = ({ icon, label, value, max, color }) => {
       )}
       {!isUnlimited && (
         <p className="text-xs text-neutral-500 mt-1.5">
-          {max - value} remaining
+          {max - value} {remainingText}
         </p>
       )}
     </div>
@@ -50,6 +51,7 @@ const StatCard = ({ icon, label, value, max, color }) => {
 };
 
 const Profile = () => {
+  const { t } = useTranslation();
   const { user, isAuthenticated, loading, updateSkills, checkAuth } = useAuth();
   const [newSkill, setNewSkill] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -79,16 +81,16 @@ const Profile = () => {
         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mx-auto mb-6 text-4xl shadow-2xl shadow-orange-500/30">
           👤
         </div>
-        <h1 className="text-4xl font-extrabold mb-3">Your Profile</h1>
+        <h1 className="text-4xl font-extrabold mb-3">{t("profile_sign_in_heading")}</h1>
         <p className="text-neutral-400 mb-8 leading-relaxed">
-          Sign in with Google to track your resume history, manage skills, and see your remaining credits.
+          {t("profile_sign_in_desc")}
         </p>
         <button
           onClick={() => window.location.href = '/auth/google'}
           className="flex items-center gap-3 bg-white text-gray-800 px-8 py-4 rounded-2xl font-bold hover:bg-gray-100 transition-all shadow-xl mx-auto"
         >
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-          Sign in with Google
+          {t("profile_sign_in_btn")}
         </button>
       </motion.div>
     </div>
@@ -121,9 +123,9 @@ const Profile = () => {
   };
 
   const tabs = [
-    { id: 'overview', label: 'Overview', icon: <FaChartBar /> },
-    { id: 'resumes', label: `Resumes (${user?.savedResumes?.length || 0})`, icon: <FaFileAlt /> },
-    { id: 'skills', label: 'Skills', icon: <FaBriefcase /> },
+    { id: 'overview', label: t("profile_tab_overview"), icon: <FaChartBar /> },
+    { id: 'resumes', label: `${t("profile_tab_resumes")} (${user?.savedResumes?.length || 0})`, icon: <FaFileAlt /> },
+    { id: 'skills', label: t("profile_tab_skills"), icon: <FaBriefcase /> },
   ];
 
   return (
@@ -142,6 +144,7 @@ const Profile = () => {
                 src={user.image}
                 alt={user.displayName}
                 className="w-24 h-24 rounded-full border-4 border-orange-500 shadow-xl shadow-orange-500/20"
+                referrerPolicy="no-referrer"
               />
               {user.isAdmin && (
                 <span className="absolute -bottom-1 -right-1 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -154,15 +157,15 @@ const Profile = () => {
               <p className="text-neutral-400 mt-1">{user.email}</p>
               <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
                 <span className="bg-orange-500/15 text-orange-400 border border-orange-500/30 px-3 py-1 rounded-full text-xs font-semibold">
-                  {user.isAdmin ? '👑 Admin Account' : 'Free Tier'}
+                  {user.isAdmin ? `👑 ${t("profile_admin_badge")}` : t("profile_free_tier")}
                 </span>
                 <span className="bg-blue-500/15 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold">
                   <FaCalendarAlt className="inline mr-1" />
-                  Joined {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  {t("profile_joined")} {new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                 </span>
                 <span className="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold">
                   <FaCheckCircle className="inline mr-1" />
-                  Verified
+                  {t("profile_verified")}
                 </span>
               </div>
             </div>
@@ -193,29 +196,31 @@ const Profile = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <StatCard
                   icon={<FaFileAlt />}
-                  label="Resume Generations"
+                  label={t("profile_stat_resume_gen")}
                   value={credits?.generationsUsed ?? user.generationsUsed ?? 0}
                   max={credits?.isAdmin ? Infinity : (credits?.generationLimit ?? 10)}
                   color="orange"
+                  remainingText={t("profile_stat_remaining")}
                 />
                 <StatCard
                   icon={<FaBriefcase />}
-                  label="Interview Sessions"
+                  label={t("profile_stat_interviews")}
                   value={credits?.interviewsUsed ?? user.interviewsUsed ?? 0}
                   max={credits?.isAdmin ? Infinity : (credits?.interviewLimit ?? 20)}
                   color="blue"
+                  remainingText={t("profile_stat_remaining")}
                 />
               </div>
 
               {/* Quick Summary */}
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
-                <h3 className="font-bold text-lg mb-4 text-neutral-200">Account Summary</h3>
+                <h3 className="font-bold text-lg mb-4 text-neutral-200">{t("profile_account_summary")}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                   {[
-                    { label: 'Resumes Saved', value: user?.savedResumes?.length || 0 },
-                    { label: 'Skills Listed', value: user?.skills?.length || 0 },
-                    { label: 'Generations Used', value: credits?.generationsUsed ?? 0 },
-                    { label: 'Account Type', value: user?.isAdmin ? 'Admin' : 'Free' },
+                    { label: t("profile_stat_resumes_saved"), value: user?.savedResumes?.length || 0 },
+                    { label: t("profile_stat_skills_listed"), value: user?.skills?.length || 0 },
+                    { label: t("profile_stat_gen_used"), value: credits?.generationsUsed ?? 0 },
+                    { label: t("profile_stat_account_type"), value: user?.isAdmin ? t("profile_admin") : t("profile_free") },
                   ].map((item, i) => (
                     <div key={i} className="bg-neutral-800/50 rounded-xl p-4">
                       <div className="text-2xl font-black text-orange-400">{item.value}</div>
@@ -232,7 +237,7 @@ const Profile = () => {
             <motion.div key="resumes" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
                 <h2 className="text-xl font-bold mb-5 flex items-center gap-2 text-blue-400">
-                  <FaFileAlt /> Saved Resumes
+                  <FaFileAlt /> {t("profile_saved_resumes_heading")}
                 </h2>
                 {user?.savedResumes?.length > 0 ? (
                   <div className="space-y-3">
@@ -249,7 +254,7 @@ const Profile = () => {
                             <FaFileAlt />
                           </div>
                           <div>
-                            <h3 className="font-semibold">{resume.title || 'Untitled Resume'}</h3>
+                            <h3 className="font-semibold">{resume.title || t("profile_untitled")}</h3>
                             <p className="text-xs text-neutral-500">
                               {new Date(resume.createdAt).toLocaleDateString('en-US', {
                                 day: 'numeric', month: 'short', year: 'numeric'
@@ -272,10 +277,10 @@ const Profile = () => {
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-neutral-600">
                     <FaFileAlt size={48} className="mb-4 opacity-20" />
-                    <p className="text-lg font-semibold mb-2">No resumes saved yet</p>
-                    <p className="text-sm">Generate a resume on the Build page and save it here.</p>
+                    <p className="text-lg font-semibold mb-2">{t("profile_no_resumes")}</p>
+                    <p className="text-sm">{t("profile_no_resumes_desc")}</p>
                     <a href="/build" className="mt-5 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-xl font-semibold transition-all text-sm">
-                      Start Building →
+                      {t("profile_start_building")}
                     </a>
                   </div>
                 )}
@@ -288,12 +293,12 @@ const Profile = () => {
             <motion.div key="skills" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
                 <h2 className="text-xl font-bold mb-5 flex items-center gap-2 text-orange-400">
-                  <FaBriefcase /> My Skills
+                  <FaBriefcase /> {t("profile_skills_heading")}
                 </h2>
                 <form onSubmit={handleAddSkill} className="flex gap-2 mb-6">
                   <input
                     type="text"
-                    placeholder="Add a skill (e.g. React, Python...)"
+                    placeholder={t("profile_skill_placeholder")}
                     value={newSkill}
                     onChange={(e) => setNewSkill(e.target.value)}
                     className="flex-1 bg-neutral-800 border border-neutral-700 rounded-xl px-4 py-3 focus:outline-none focus:border-orange-500 transition-colors"
@@ -303,7 +308,7 @@ const Profile = () => {
                     disabled={isSaving || !newSkill.trim()}
                     className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 px-5 py-3 rounded-xl font-semibold transition-all flex items-center gap-2"
                   >
-                    <FaSave /> {isSaving ? 'Saving...' : 'Add'}
+                    <FaSave /> {isSaving ? t("profile_saving_skill") : t("profile_add_skill")}
                   </button>
                 </form>
 
@@ -324,7 +329,7 @@ const Profile = () => {
                       </button>
                     </motion.div>
                   )) : (
-                    <p className="text-neutral-500 text-sm">No skills added yet. Add your first skill above!</p>
+                    <p className="text-neutral-500 text-sm">{t("profile_no_skills")}</p>
                   )}
                 </div>
               </div>

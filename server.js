@@ -46,7 +46,19 @@ const openrouter = new OpenRouter({
 const app = express();
 
 // 🔐 Security Headers
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https://lh3.googleusercontent.com", "https://www.gstatic.com"],
+      connectSrc: ["'self'", "https://openrouter.ai", "https://hacker-news.firebaseio.com"],
+    },
+  },
+  crossOriginEmbedderPolicy: false,
+}));
 app.set('trust proxy', 1);
 
 // 🔌 MongoDB Connection
