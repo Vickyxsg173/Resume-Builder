@@ -28,7 +28,10 @@ app.set('trust proxy', 1);
 // 🔌 MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/resumeb')
   .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+  .catch(err => {
+    console.error('❌ MongoDB Connection Error Details:', err.message);
+    // Optimization: Don't crash the server, just log the error
+  });
 
 // 🛡️ Middleware
 const isProduction = process.env.NODE_ENV === 'production';
