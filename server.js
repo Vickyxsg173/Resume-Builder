@@ -13,10 +13,31 @@ import { rateLimit } from "express-rate-limit";
 import path from "path";
 import { fileURLToPath } from 'url';
 
+// 🛑 GLOBAL ERROR HANDLERS
+process.on('uncaughtException', (err) => {
+  console.error('💥 UNCAUGHT EXCEPTION! App is crashing...');
+  console.error(err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('💥 UNHANDLED REJECTION! App is crashing...');
+  console.error(err);
+  process.exit(1);
+});
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
+
+// 🔍 Environment Variable Validation
+const requiredEnv = ['OPENROUTER_API_KEY', 'MONGODB_URI', 'SESSION_SECRET'];
+requiredEnv.forEach(key => {
+  if (!process.env[key]) {
+    console.warn(`⚠️  WARNING: Environment variable ${key} is missing!`);
+  }
+});
 
 const openrouter = new OpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
