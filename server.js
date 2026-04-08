@@ -13,16 +13,16 @@ import { rateLimit } from "express-rate-limit";
 import path from "path";
 import { fileURLToPath } from 'url';
 
-// 🛑 GLOBAL ERROR HANDLERS
+// 🛑 GLOBAL ERROR HANDLERS (Absolute Top)
 process.on('uncaughtException', (err) => {
-  console.error('💥 UNCAUGHT EXCEPTION! App is crashing...');
+  console.error('💥 CRASH: Uncaught Exception!');
   console.error(err);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (err) => {
-  console.error('💥 UNHANDLED REJECTION! App is crashing...');
-  console.error(err);
+process.on('unhandledRejection', (promise, reason) => {
+  console.error('💥 CRASH: Unhandled Rejection!');
+  console.error(reason);
   process.exit(1);
 });
 
