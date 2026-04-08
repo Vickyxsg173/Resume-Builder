@@ -80,32 +80,32 @@ const Home = () => {
   return (
     <div className="bg-black">
       {/* PAGE 1 */}
-    <div className='w-full h-[100vh] bg-black text-white p-[3vw]'>
-      <div className='flex flex-row'>
-        <div className='mt-[20vh] w-[65vw]'>
-          <h1 ref={head1} className='text-[10vh] w-full text-orange-600 font-black leading-tight'>{t("heading")}</h1>
-          <p ref={sub1} className='text-2xl w-[75%] pt-[5vh] text-neutral-400 font-light'>{t("subheading")}<span className='text-4xl text-orange-500 font-bold ml-2'>AI</span>.</p>
+    <div className='w-full min-h-[100vh] bg-black text-white px-4 sm:px-[3vw] pt-[12vh] pb-8'>
+      <div className='flex flex-col lg:flex-row gap-8 lg:gap-0'>
+        <div className='mt-4 lg:mt-[10vh] w-full lg:w-[65vw]'>
+          <h1 ref={head1} className='text-5xl sm:text-6xl md:text-7xl lg:text-[8vh] xl:text-[10vh] w-full text-orange-600 font-black leading-tight'>{t("heading")}</h1>
+          <p ref={sub1} className='text-lg sm:text-xl md:text-2xl w-full sm:w-[85%] lg:w-[75%] pt-4 lg:pt-[5vh] text-neutral-400 font-light'>{t("subheading")}<span className='text-2xl sm:text-3xl md:text-4xl text-orange-500 font-bold ml-2'>AI</span>.</p>
         </div>
-        <div className='w-[35vw] mt-[20vh] grid grid-cols-2 grid-rows-2 gap-2 p-1'>
-          <div ref={box1} className='flex flex-col items-center p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
-            <FaFileAlt size={40} className="mb-3" />
-            <h3 className="font-semibold text-lg mb-1">Smart Resume Templates</h3>
-            <p className="text-center text-sm">Choose from AI-optimized templates tailored to your industry.</p>
+        <div className='w-full lg:w-[35vw] mt-4 lg:mt-[10vh] grid grid-cols-2 gap-2 p-1'>
+          <div ref={box1} className='flex flex-col items-center p-3 sm:p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
+            <FaFileAlt size={32} className="mb-2 sm:mb-3" />
+            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">Smart Resume Templates</h3>
+            <p className="text-center text-xs sm:text-sm hidden sm:block">Choose from AI-optimized templates tailored to your industry.</p>
           </div>
-          <div ref={box2} className='flex flex-col items-center p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
-            <FaMagic size={40} className="mb-3" />
-            <h3 className="font-semibold text-lg mb-1">AI-Powered Content Suggestions</h3>
-            <p className="text-center text-sm">Get intelligent phrasing and keyword suggestions to stand out.</p>
+          <div ref={box2} className='flex flex-col items-center p-3 sm:p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
+            <FaMagic size={32} className="mb-2 sm:mb-3" />
+            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">AI-Powered Suggestions</h3>
+            <p className="text-center text-xs sm:text-sm hidden sm:block">Get intelligent phrasing and keyword suggestions to stand out.</p>
           </div>
-          <div ref={box3} className='flex flex-col items-center p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
-            <FaChartLine size={40} className="mb-3" />
-            <h3 className="font-semibold text-lg mb-1">Real-time Feedback</h3>
-            <p className="text-center text-sm">Receive instant insights on resume strength and improvements.</p>
+          <div ref={box3} className='flex flex-col items-center p-3 sm:p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
+            <FaChartLine size={32} className="mb-2 sm:mb-3" />
+            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">Real-time Feedback</h3>
+            <p className="text-center text-xs sm:text-sm hidden sm:block">Receive instant insights on resume strength and improvements.</p>
           </div>
-          <div ref={box4} className='flex flex-col items-center p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
-            <FaShieldAlt size={40} className="mb-3" />
-            <h3 className="font-semibold text-lg mb-1">Privacy & Security</h3>
-            <p className="text-center text-sm">Your data is protected with industry-leading security measures.</p>
+          <div ref={box4} className='flex flex-col items-center p-3 sm:p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
+            <FaShieldAlt size={32} className="mb-2 sm:mb-3" />
+            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">Privacy &amp; Security</h3>
+            <p className="text-center text-xs sm:text-sm hidden sm:block">Your data is protected with industry-leading security measures.</p>
           </div>
         </div>
       </div>
@@ -114,32 +114,32 @@ const Home = () => {
       {/* PAGE 2 */}
       <div className='page-2 w-full bg-black text-white'>
         <div className="scroll-section w-full h-[100vh] overflow-hidden flex items-center">
-          <div className="scroll-text whitespace-nowrap text-[45vh] font-black text-white/90">
+          <div className="scroll-text whitespace-nowrap text-[20vw] sm:text-[30vw] md:text-[40vh] lg:text-[45vh] font-black text-white/90">
             BUILD SMARTER
           </div>
         </div>
       </div>
 
       {/* PAGE 3 */}
-      <div className='page-3 w-full min-h-screen bg-black text-white px-[10vw] flex flex-col items-center justify-center text-center relative overflow-hidden'>
+      <div className='page-3 w-full min-h-screen bg-black text-white px-6 sm:px-[8vw] md:px-[10vw] flex flex-col items-center justify-center text-center relative overflow-hidden'>
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_rgba(255,106,0,0.05),transparent_70%)]" />
         
-        <h2 className="p3-text text-5xl md:text-8xl font-black mb-12 leading-[1.1] relative z-10">
+        <h2 className="p3-text text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-8 md:mb-12 leading-[1.1] relative z-10">
           THE FUTURE OF <br/>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-300">
             CAREER EMPOWERMENT
           </span>
         </h2>
         
-        <p className="p3-text text-xl md:text-2xl text-neutral-400 max-w-4xl mx-auto font-light leading-relaxed relative z-10">
+        <p className="p3-text text-base sm:text-xl md:text-2xl text-neutral-400 max-w-4xl mx-auto font-light leading-relaxed relative z-10">
           We are not just building resumes; we are building bridges to your next great opportunity. 
           By combining advanced LLMs with clean professional aesthetics, we ensure you 
           never have to struggle with formatting or phrasing again.
         </p>
         
-        <div className="p3-text mt-20 flex gap-6 relative z-10">
-          <div className="w-1 h-24 bg-gradient-to-b from-orange-500 to-transparent" />
-          <p className="text-left text-orange-500 font-bold uppercase tracking-[0.3em] self-center">
+        <div className="p3-text mt-12 md:mt-20 flex gap-6 relative z-10">
+          <div className="w-1 h-16 md:h-24 bg-gradient-to-b from-orange-500 to-transparent" />
+          <p className="text-left text-orange-500 font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] self-center text-sm md:text-base">
             Elevating every <br/>professional journey
           </p>
         </div>

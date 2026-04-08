@@ -89,7 +89,7 @@ const InterviewPrep = () => {
   };
 
   return (
-    <div className="p-8 pt-[12vh] bg-neutral-950 text-white w-full min-h-[100vh] font-sans">
+    <div className="p-4 sm:p-8 pt-[10vh] sm:pt-[12vh] bg-neutral-950 text-white w-full min-h-[100vh] font-sans">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
           Technical Interview Simulator
@@ -161,14 +161,14 @@ const InterviewPrep = () => {
               </div>
 
               {!isReviewing && (
-                <div className="mt-5 flex justify-between items-center">
+                <div className="mt-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                   <div className="text-neutral-500 italic text-sm min-h-[1.5rem]">
                     {listening && (transcript ? <span className="text-emerald-400 not-italic">Processing voice...</span> : <span>Listening...</span>)}
                   </div>
                   
                   <button
                     onClick={submitAnswer}
-                    className="bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white px-8 py-3 font-semibold transition shadow-lg shadow-emerald-600/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white px-8 py-3 font-semibold transition shadow-lg shadow-emerald-600/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 w-full sm:w-auto justify-center"
                     disabled={loading || (!answer.trim() && !transcript.trim())}
                   >
                     {loading ? (

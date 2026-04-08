@@ -107,7 +107,7 @@ function App(){
             </Routes>
           </div>
           <div ref={aichat}
-            className="fixed bottom-6 right-6 z-50 cursor-pointer"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 cursor-pointer"
             onClick={() => setOpenChat(!openChat)}
           >
             <RiChatAiFill
@@ -116,11 +116,12 @@ function App(){
             />
           </div>
           {openChat && (
-            <div className="fixed bottom-20 right-6 w-[300px] h-[400px] bg-white border-2 border-orange-500 rounded-xl shadow-xl z-50 flex flex-col">
+            <div className="fixed bottom-20 right-0 sm:right-6 w-full sm:w-[320px] h-[70vh] sm:h-[400px] max-h-[500px] bg-white border-2 border-orange-500 sm:rounded-xl shadow-xl z-50 flex flex-col">
               
               {/* Header */}
-              <div className="bg-orange-500 text-white p-3 rounded-t-xl font-semibold">
-                AI Chat
+              <div className="bg-orange-500 text-white p-3 sm:rounded-t-xl font-semibold flex items-center justify-between">
+                <span>AI Chat</span>
+                <button onClick={() => setOpenChat(false)} className="text-white/80 hover:text-white ml-auto text-xl leading-none">&times;</button>
               </div>
         
               {/* Chat Body */}

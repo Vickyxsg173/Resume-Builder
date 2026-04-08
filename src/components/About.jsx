@@ -35,7 +35,7 @@ const About = () => {
     <div className="bg-black text-white relative font-sans overflow-x-hidden">
       
       {/* 1. HERO SECTION (Full Viewport) */}
-      <section className="h-screen flex flex-col items-center justify-center relative px-6 text-center bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-orange-900/20 via-black to-black">
+      <section className="h-screen flex flex-col items-center justify-center relative px-4 sm:px-6 text-center bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-orange-900/20 via-black to-black">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -234,10 +234,10 @@ const About = () => {
             </button>
           </div>
           <div className="grid grid-cols-2 gap-4">
-             <div className="h-64 bg-black/10 rounded-2xl flex items-center justify-center border border-black/10">
+             <div className="h-32 sm:h-48 md:h-64 bg-black/10 rounded-2xl flex items-center justify-center border border-black/10">
                 <FaUserTie size={48} className="opacity-20" />
              </div>
-             <div className="h-64 bg-white/20 rounded-2xl flex items-center justify-center border border-black/10 mt-8">
+             <div className="h-32 sm:h-48 md:h-64 bg-white/20 rounded-2xl flex items-center justify-center border border-black/10 mt-4 sm:mt-8">
                 <FaRobot size={48} className="opacity-20" />
              </div>
           </div>

@@ -102,7 +102,7 @@ const Build = () => {
   };
 
   return (
-    <div className="p-6 w-full min-h-[100vh] pt-[12vh] bg-black">
+    <div className="p-4 sm:p-6 w-full min-h-[100vh] pt-[10vh] sm:pt-[12vh] bg-black">
       <h2 className="text-3xl font-semibold mb-8 text-center text-white">AI Resume Builder</h2>
 
       <form onSubmit={handleSubmit} className="flex border-2 border-gray-400 flex-col gap-6 bg-black p-8 rounded-lg max-w-3xl mx-auto shadow-lg">
@@ -171,8 +171,8 @@ const Build = () => {
 
       {/* Output */}
       {resume && (
-        <div className="mt-12 flex flex-col items-center pb-20">
-          <div className="w-full max-w-[21cm] flex justify-end gap-3 mb-4">
+        <div className="mt-12 flex flex-col items-center pb-20 w-full overflow-x-auto">
+          <div className="w-full max-w-[21cm] flex justify-end gap-3 mb-4 min-w-[320px] px-2">
             {isAuthenticated && (
               <button
                 onClick={handleSaveToProfile}
