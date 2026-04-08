@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const { data } = await axios.get("http://localhost:5000/auth/user");
+      const { data } = await axios.get("/auth/user");
       if (data.isAuthenticated) {
         setUser(data.user);
         setIsAuthenticated(true);
@@ -35,12 +35,12 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = () => {
-    window.location.href = "http://localhost:5000/auth/google";
+    window.location.href = "/auth/google";
   };
 
   const logout = async () => {
     try {
-      await axios.get("http://localhost:5000/auth/logout");
+      await axios.get("/auth/logout");
       setUser(null);
       setIsAuthenticated(false);
       window.location.href = "/";
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateSkills = async (skills) => {
     try {
-      const { data } = await axios.patch("http://localhost:5000/api/profile/skills", { skills });
+      const { data } = await axios.patch("/api/profile/skills", { skills });
       setUser(data);
       return data;
     } catch (error) {
@@ -62,7 +62,7 @@ export const AuthProvider = ({ children }) => {
 
   const saveResume = async (title, content) => {
     try {
-      const { data } = await axios.post("http://localhost:5000/api/profile/resumes", { title, content });
+      const { data } = await axios.post("/api/profile/resumes", { title, content });
       setUser(data);
       return data;
     } catch (error) {

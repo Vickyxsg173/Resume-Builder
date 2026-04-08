@@ -10,7 +10,7 @@ const News = () => {
   const getNews = async () => {
     try {
       setError("");
-      const res = await axios.get("http://localhost:5000/api/hn-news");
+      const res = await axios.get("/api/hn-news");
       const data = res.data;
 
       if (data.success) {

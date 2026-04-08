@@ -45,7 +45,7 @@ const Build = () => {
     setResume("");
 
     try {
-      const response = await fetch("http://localhost:5000/generate-resume", {
+      const response = await fetch("/generate-resume", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

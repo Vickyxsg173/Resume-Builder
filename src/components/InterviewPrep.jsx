@@ -44,7 +44,7 @@ const InterviewPrep = () => {
   const fetchNextQuestion = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/api/interview/start");
+      const res = await axios.get("/api/interview/start");
       setQuestion(res.data.question);
       setAnswer("");
       setFeedback("");
@@ -73,7 +73,7 @@ const InterviewPrep = () => {
     setAnswer(currentFinalAnswer);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/interview/answer", {
+      const res = await axios.post("/api/interview/answer", {
         answer: currentFinalAnswer,
         question,
       });
