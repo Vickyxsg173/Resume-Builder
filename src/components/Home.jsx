@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react'
 import gsap from 'gsap';
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { FaFileAlt, FaMagic, FaChartLine, FaShieldAlt } from 'react-icons/fa'
+import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 
 const Home = () => {
 
@@ -12,6 +14,8 @@ const Home = () => {
   const box2 = useRef(null);
   const box3 = useRef(null);
   const box4 = useRef(null);
+
+  const { t } = useTranslation();
 
   useEffect(()=>{
     let ctx = gsap.context(()=>{
@@ -64,9 +68,8 @@ const Home = () => {
     <div className='w-full h-[100vh] bg-black text-white p-[3vw]'>
       <div className='flex flex-row'>
         <div className='mt-[20vh] w-[65vw]'>
-          <h1 ref={head1} className='text-[10vh] w-full text-orange-600'>Build Your Future with AI-Powered Tools</h1>
-          <p ref={sub1} className='text-xl w-[75%] pt-[5vh]'>Transform your ideas into professional resumes and get insights instantly.
-          Your career, accelerated by <span className='text-3xl text-orange-500'>AI</span>.</p>
+          <h1 ref={head1} className='text-[10vh] w-full text-orange-600'>{t("heading")}</h1>
+          <p ref={sub1} className='text-xl w-[75%] pt-[5vh]'>{t("subheading")}<span className='text-3xl text-orange-500'>AI</span>.</p>
         </div>
         <div className='w-[35vw] mt-[20vh] grid grid-cols-2 grid-rows-2 gap-2 p-1'>
           <div ref={box1} className='flex flex-col items-center p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>

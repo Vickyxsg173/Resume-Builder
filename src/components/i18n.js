@@ -18,7 +18,9 @@ i18n
           profile: "Profile",
           welcome: "Welcome to Resume Builder",
           send: "Send",
-          type_message: "Type a message..."
+          type_message: "Type a message...",
+          heading: "Build Your Future with AI-Powered Tools",
+          subheading: "Transform your ideas into professional resumes and get insights instantly. Your career, accelerated by "
         }
       },
       hi: {
@@ -32,7 +34,9 @@ i18n
           profile: "प्रोफ़ाइल",
           welcome: "रिज़्यूमे बिल्डर में आपका स्वागत है",
           send: "भेजें",
-          type_message: "संदेश लिखें..."
+          type_message: "संदेश लिखें...",
+          heading: "AI-संचालित टूल्स के साथ अपना भविष्य बनाएं",
+          subheading: "अपने विचारों को दें एक प्रोफेशनल रूप और पाएं इंस्टेंट फीडबैक। आपके करियर को और भी आगे बढ़ाएगा "
         }
       }
     },

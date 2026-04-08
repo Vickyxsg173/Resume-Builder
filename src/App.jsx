@@ -44,7 +44,8 @@ function App(){
           y:-50,
           duration:0.5,
           opacity:0,
-          stagger:0.25
+          stagger:0.15,
+          clearProps: "all"
         })
         gsap.from(aichat.current,{
           x:1000,
@@ -93,12 +94,12 @@ function App(){
     return(
         <>
           <div className="">
-            <nav className="z-30 w-full fixed h-[5vh] bg-black text-lg text-white flex flex-row justify-between items-center px-[3vw]">
+            <nav className="z-30 w-full fixed bg-black text-lg text-white flex flex-row justify-between items-center px-[3vw] py-2">
               <div ref={addtoref} className="flex flex-row items-center">
                 <span><FaClipboardUser size={20}/></span>
                 <h1 className="text-lg">ResumeBuild</h1>
               </div>
-              <div className="flex flex-row gap-[2vw]">
+              <div className="flex flex-row gap-[2vw] items-center">
                 <Link className="hover:text-orange-600" ref={addtoref} to="/">{t("home")}</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/Build">{t("build")}</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/InterviewPrep">{t("interview")}</Link>
@@ -106,13 +107,13 @@ function App(){
                 <Link className="hover:text-orange-600" ref={addtoref} to="/About">{t("about")}</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/Contact">{t("contact")}</Link>
                 <Link className="hover:text-orange-600" ref={addtoref} to="/Profile">{t("profile")}</Link>
-                <div className="flex gap-2 items-center">
+                <div className="flex items-center gap-1 text-sm">
                   <button
                     onClick={() => {
                       i18n.changeLanguage("en");
                       localStorage.setItem("lang", "en");
                     }}
-                    className="px-2 py-1 border rounded hover:bg-white hover:text-black transition"
+                    className="px-2 py-[2px] border border-white rounded hover:bg-white hover:text-black transition leading-none"
                   >
                     EN
                   </button>
@@ -122,7 +123,7 @@ function App(){
                       i18n.changeLanguage("hi");
                       localStorage.setItem("lang", "hi");
                     }}
-                    className="px-2 py-1 border rounded hover:bg-white hover:text-black transition"
+                    className="px-2 py-[2px] border border-white rounded hover:bg-white hover:text-black transition leading-none"
                   >
                     HI
                   </button>
