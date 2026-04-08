@@ -11,7 +11,10 @@ import User from "./models/User.js";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import path from "path";
-const __dirname = path.resolve();
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -444,7 +447,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "dist")));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "dist", "index.html"));
+    res.sendFile(path.resolve(__dirname, "dist", "index.html"));
   });
 }
 app.listen(PORT, () => {
