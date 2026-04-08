@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import html2pdf from "html2pdf.js";
 
 const Build = () => {
   const [formData, setFormData] = useState({
     name: "",
+    contact: "",
+    links: "",
     summary: "",
     skills: "",
     experience: "",
@@ -55,8 +58,20 @@ const Build = () => {
     setLoading(false);
   };
 
+  const downloadPDF = () => {
+    const element = document.getElementById("resume-output");
+    const opt = {
+      margin:       0.5,
+      filename:     `${formData.name.replace(/\s+/g, '_') || 'Resume'}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+  };
+
   return (
-    <div className="p-6 w-full h-[100vh] pt-[7vh] bg-black">
+    <div className="p-6 w-full min-h-[100vh] pt-[12vh] bg-black">
       <h2 className="text-3xl font-semibold mb-8 text-center text-white">AI Resume Builder</h2>
 
       <form onSubmit={handleSubmit} className="flex border-2 border-gray-400 flex-col gap-6 bg-black p-8 rounded-lg max-w-3xl mx-auto shadow-lg">
@@ -65,6 +80,19 @@ const Build = () => {
           placeholder="Name"
           onChange={handleChange}
           required
+          className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+        />
+        <input
+          name="contact"
+          placeholder="Contact Info (Email, Phone, City)"
+          onChange={handleChange}
+          required
+          className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
+        />
+        <input
+          name="links"
+          placeholder="Optional Links (GitHub, LinkedIn, Portfolio)"
+          onChange={handleChange}
           className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <textarea
@@ -112,44 +140,41 @@ const Build = () => {
 
       {/* Output */}
       {resume && (
-        <div
-          style={{
-            marginTop: "30px",
-            background: "#f5f5f5",
-            padding: "20px",
-            borderRadius: "10px",
-            maxHeight: "500px",
-            overflowY: "auto",
-            overflowX: "auto",
-            wordBreak: "break-word",
-            whiteSpace: "pre-wrap",
-            overflowWrap: "anywhere"
-          }}
-        >
-          <h3>Generated Resume</h3>
-          {typeof resume === "string" ? (
-            <ReactMarkdown
-              components={{
-                p: ({ children }) => (
-                  <p style={{ marginBottom: "10px", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>
-                    {children}
-                  </p>
-                ),
-                li: ({ children }) => (
-                  <li style={{ marginBottom: "5px", lineHeight: "1.6" }}>
-                    {children}
-                  </li>
-                ),
-                h1: ({ children }) => <h1 style={{ marginBottom: "10px" }}>{children}</h1>,
-                h2: ({ children }) => <h2 style={{ marginBottom: "10px" }}>{children}</h2>,
-                h3: ({ children }) => <h3 style={{ marginBottom: "10px" }}>{children}</h3>,
-              }}
+        <div className="mt-12 flex flex-col items-center pb-20">
+          <div className="w-full max-w-[21cm] flex justify-end mb-4">
+            <button
+              onClick={downloadPDF}
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition cursor-pointer"
             >
-              {resume}
-            </ReactMarkdown>
-          ) : (
-            <p>Error displaying resume</p>
-          )}
+              Download PDF
+            </button>
+          </div>
+          
+          <div
+            id="resume-output"
+            className="w-full max-w-[21cm] min-h-[29.7cm] bg-white text-black p-10 shadow-2xl rounded-sm"
+            style={{
+              fontFamily: "'Times New Roman', Times, serif"
+            }}
+          >
+            {typeof resume === "string" ? (
+              <ReactMarkdown
+                components={{
+                  h1: ({ children }) => <h1 className="text-3xl font-bold text-center mb-4 uppercase tracking-wider border-b-2 border-black pb-2">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-xl font-bold mt-6 mb-2 border-b border-gray-400 pb-1 uppercase">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-lg font-semibold mt-4 mb-1">{children}</h3>,
+                  p: ({ children }) => <p className="mb-2 leading-relaxed text-[15px] text-gray-800 break-words whitespace-pre-wrap">{children}</p>,
+                  ul: ({ children }) => <ul className="list-disc pl-5 mb-3">{children}</ul>,
+                  li: ({ children }) => <li className="mb-1 text-[15px] text-gray-800 leading-relaxed">{children}</li>,
+                  strong: ({ children }) => <strong className="font-bold text-black">{children}</strong>
+                }}
+              >
+                {resume}
+              </ReactMarkdown>
+            ) : (
+              <p>Error displaying resume</p>
+            )}
+          </div>
         </div>
       )}
     </div>

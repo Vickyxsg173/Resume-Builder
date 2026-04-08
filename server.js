@@ -25,82 +25,66 @@ app.post("/generate-resume", async (req, res) => {
     const prompt = `
 You are an expert resume writer and ATS optimization specialist.
 
-Your task is to transform raw, unstructured, or basic user input into a highly professional, ATS-friendly resume that can compete with top-tier candidates.
+Your task is to transform raw, unstructured user input into a highly professional, ATS-friendly resume.
 
 User Data:
 ${JSON.stringify(userData, null, 2)}
 
 STRICT INSTRUCTIONS:
 
-1. STRUCTURE:
-Create a well-structured resume with the following sections:
-- Full Name (as heading)
-- Professional Summary (2–4 impactful lines)
-- Key Skills (bullet points, grouped if possible)
-- Professional Experience (bullet points with achievements)
-- Projects (with impact and technologies)
+1. MARKDOWN FORMATTING RULES (CRITICAL):
+- ABSOLUTELY DO NOT use bold text formatting (no asterisks **, no __). We apply clean CSS fonts automatically.
+- Use exactly ONE '#' for the candidate's Full Name at the very top.
+- IMMEDIATELY below the Name, place the Contact Info and Links on a single plain text line separated by " | ". Do NOT use a header for this line.
+- Use exactly TWO '##' for main Section Headers (e.g. ## Professional Summary, ## Experience, ## Education).
+- Use exactly THREE '###' for job titles, company names, project titles, or degrees.
+- Use the standard minus sign '-' strictly for bulleted lists.
+- Do NOT use hyphens as dividers or random symbols. Keep it clean text.
+
+2. STRUCTURE REQUIREMENT:
+- Name (Heading 1)
+- Contact Info & Links (Plain text, pipe separated)
+- Professional Summary
+- Key Skills
+- Professional Experience
+- Projects
 - Education
-- (Optional) Certifications / Tools / Achievements if applicable
 
-2. CONTENT ENHANCEMENT:
-- Improve weak or vague content into strong, impactful statements
-- Add action verbs (Developed, Optimized, Engineered, Led, Built)
-- Add measurable impact wherever possible (%, time saved, performance improved)
-- Infer reasonable improvements if data is vague (but keep realistic)
+3. ATS OPTIMIZATION & CONTENT:
+- Ensure all bullet points use strong action verbs (Developed, Engineered, Optimized, Led).
+- Add measurable impact/metrics wherever logically inferable.
+- Keep it highly concise, avoiding generic fluff words like "hardworking".
 
-3. ATS OPTIMIZATION:
-- Use relevant keywords from tech/domain
-- Keep formatting clean (no emojis, no fancy symbols)
-- Use bullet points for readability
-- Avoid unnecessary fluff
-
-4. FORMATTING:
-- Use clear headings (ALL CAPS)
-- Use consistent bullet points
-- Maintain spacing between sections
-- Make it look like a real professional resume (not a paragraph)
-
-5. TONE:
-- Professional, confident, concise
-- No repetition
-- No generic phrases like "hardworking individual"
-
-6. OUTPUT FORMAT:
-Return ONLY the final resume text (no explanations)
-
-Generate a polished, industry-ready resume.
+4. OUTPUT FORMAT:
+Return ONLY the final resume markdown text. Do not output any conversational filler or codeblocks.
 `;
 
     let aiResume = "";
-
     let retries = 2;
-    let stream;
 
     while (retries >= 0) {
       try {
-        stream = await openrouter.chat.send({
-          model: "openai/gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          stream: true,
-        });
+        const response = await axios.post(
+          "https://openrouter.ai/api/v1/chat/completions",
+          {
+            model: "openai/gpt-4o-mini",
+            messages: [{ role: "user", content: prompt }]
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+
+        aiResume = response.data.choices[0].message.content;
         break; // success
       } catch (err) {
         if (retries === 0) throw err;
         console.log("Retrying due to rate limit...");
         retries--;
         await new Promise(res => setTimeout(res, 2000));
-      }
-    }
-
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content;
-      if (content) {
-        aiResume += content;
       }
     }
 
@@ -127,7 +111,7 @@ app.get("/api/interview/start", async (req, res) => {
           {
             role: "system",
             content:
-              "You are a professional interviewer. Ask one technical interview question.",
+              "You are a professional interviewer. Ask one challenging technical interview question.\n\nSTRICT RULES:\n1. Output ONLY the raw question text.\n2. Do NOT use any Markdown formatting whatsoever (no **asterisks**).\n3. Do NOT start your sentence with 'Question:' or 'Interview Question:'.",
           },
         ],
       },
@@ -246,6 +230,9 @@ CONTEXT OF THIS WEBSITE:
 - Details to enter in build page to create resume -> name,summary,skills,experience,projects,education
 
 STRICT RULES:
+- ABSOLUTELY DO NOT use bold text formatting (no asterisks **, no __).
+- Use clear, plain text for headings if needed.
+- Use standard bullet points (-) only.
 - DO NOT suggest or mention other websites, platforms, or external tools
 - DO NOT say "you can use other sites" or give alternatives outside this product
 - ALWAYS guide the user on how to use THIS website's features

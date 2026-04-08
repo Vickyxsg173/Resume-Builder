@@ -14,6 +14,7 @@ import InterviewPrep from "./components/InterviewPrep.jsx";
 import { useTranslation } from "react-i18next";
 import i18n from "i18next";
 import { BrowserRouter,Routes,Route,Link, useLocation } from "react-router-dom";
+import ReactMarkdown from "react-markdown";
 
 function App(){
   const itemsRef = useRef([]);
@@ -113,7 +114,7 @@ function App(){
                       i18n.changeLanguage("en");
                       localStorage.setItem("lang", "en");
                     }}
-                    className="px-2 py-[2px] border border-white rounded hover:bg-white hover:text-black transition leading-none"
+                    className={`px-2 py-[2px] border border-white rounded hover:bg-white hover:text-black transition leading-none ${i18n.language === 'en' ? 'bg-white text-black' : ''}`}
                   >
                     EN
                   </button>
@@ -123,7 +124,7 @@ function App(){
                       i18n.changeLanguage("hi");
                       localStorage.setItem("lang", "hi");
                     }}
-                    className="px-2 py-[2px] border border-white rounded hover:bg-white hover:text-black transition leading-none"
+                    className={`px-2 py-[2px] border border-white rounded hover:bg-white hover:text-black transition leading-none ${i18n.language === 'hi' ? 'bg-white text-black' : ''}`}
                   >
                     HI
                   </button>
@@ -170,13 +171,22 @@ function App(){
                 {messages.map((msg, index) => (
                   <div
                     key={index}
-                    className={`p-2 rounded-md max-w-[80%] ${
+                    className={`p-3 rounded-xl max-w-[85%] shadow-sm ${
                       msg.role === "user"
-                        ? "bg-orange-500 text-white ml-auto"
-                        : "bg-gray-200 text-black"
+                        ? "bg-orange-500 text-white ml-auto rounded-tr-none"
+                        : "bg-neutral-100 text-neutral-800 border border-neutral-200 rounded-tl-none text-sm"
                     }`}
                   >
-                    {msg.content}
+                    <ReactMarkdown 
+                      components={{
+                        p: ({children}) => <p className="mb-1 last:mb-0 leading-relaxed">{children}</p>,
+                        strong: ({children}) => <span className="font-bold text-orange-600">{children}</span>,
+                        ul: ({children}) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+                        li: ({children}) => <li className="mb-1">{children}</li>
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
                   </div>
                 ))}
                 {loading && (
