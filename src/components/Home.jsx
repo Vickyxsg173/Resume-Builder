@@ -3,7 +3,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { FaFileAlt, FaMagic, FaChartLine, FaShieldAlt } from 'react-icons/fa'
 import { useTranslation } from "react-i18next";
-import i18n from "i18next";
 
 const Home = () => {
 
@@ -54,8 +53,8 @@ const Home = () => {
         scrollTrigger: {
           trigger: ".scroll-section",
           start: "top top",
-          end: "+=200%", // Increased distance to make it scroll slower
-          scrub: 2,      // Added smoothing for a more premium feel
+          end: "+=200%",
+          scrub: 2,
           pin: true,
         }
       });
@@ -89,23 +88,23 @@ const Home = () => {
         <div className='w-full lg:w-[35vw] mt-4 lg:mt-[10vh] grid grid-cols-2 gap-2 p-1'>
           <div ref={box1} className='flex flex-col items-center p-3 sm:p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
             <FaFileAlt size={32} className="mb-2 sm:mb-3" />
-            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">Smart Resume Templates</h3>
-            <p className="text-center text-xs sm:text-sm hidden sm:block">Choose from AI-optimized templates tailored to your industry.</p>
+            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">{t("feature_resume_title")}</h3>
+            <p className="text-center text-xs sm:text-sm hidden sm:block">{t("feature_resume_desc")}</p>
           </div>
           <div ref={box2} className='flex flex-col items-center p-3 sm:p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
             <FaMagic size={32} className="mb-2 sm:mb-3" />
-            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">AI-Powered Suggestions</h3>
-            <p className="text-center text-xs sm:text-sm hidden sm:block">Get intelligent phrasing and keyword suggestions to stand out.</p>
+            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">{t("feature_ai_title")}</h3>
+            <p className="text-center text-xs sm:text-sm hidden sm:block">{t("feature_ai_desc")}</p>
           </div>
           <div ref={box3} className='flex flex-col items-center p-3 sm:p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
             <FaChartLine size={32} className="mb-2 sm:mb-3" />
-            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">Real-time Feedback</h3>
-            <p className="text-center text-xs sm:text-sm hidden sm:block">Receive instant insights on resume strength and improvements.</p>
+            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">{t("feature_feedback_title")}</h3>
+            <p className="text-center text-xs sm:text-sm hidden sm:block">{t("feature_feedback_desc")}</p>
           </div>
           <div ref={box4} className='flex flex-col items-center p-3 sm:p-4 border-2 border-orange-600 rounded-2xl bg-black text-white'>
             <FaShieldAlt size={32} className="mb-2 sm:mb-3" />
-            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">Privacy &amp; Security</h3>
-            <p className="text-center text-xs sm:text-sm hidden sm:block">Your data is protected with industry-leading security measures.</p>
+            <h3 className="font-semibold text-sm sm:text-lg mb-1 text-center">{t("feature_privacy_title")}</h3>
+            <p className="text-center text-xs sm:text-sm hidden sm:block">{t("feature_privacy_desc")}</p>
           </div>
         </div>
       </div>
@@ -115,7 +114,7 @@ const Home = () => {
       <div className='page-2 w-full bg-black text-white'>
         <div className="scroll-section w-full h-[100vh] overflow-hidden flex items-center">
           <div className="scroll-text whitespace-nowrap text-[20vw] sm:text-[30vw] md:text-[40vh] lg:text-[45vh] font-black text-white/90">
-            BUILD SMARTER
+            {t("home_page2_text")}
           </div>
         </div>
       </div>
@@ -125,22 +124,20 @@ const Home = () => {
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_rgba(255,106,0,0.05),transparent_70%)]" />
         
         <h2 className="p3-text text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-8 md:mb-12 leading-[1.1] relative z-10">
-          THE FUTURE OF <br/>
+          {t("home_page3_heading_1")} <br/>
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-300">
-            CAREER EMPOWERMENT
+            {t("home_page3_heading_2")}
           </span>
         </h2>
         
         <p className="p3-text text-base sm:text-xl md:text-2xl text-neutral-400 max-w-4xl mx-auto font-light leading-relaxed relative z-10">
-          We are not just building resumes; we are building bridges to your next great opportunity. 
-          By combining advanced LLMs with clean professional aesthetics, we ensure you 
-          never have to struggle with formatting or phrasing again.
+          {t("home_page3_subtext")}
         </p>
         
         <div className="p3-text mt-12 md:mt-20 flex gap-6 relative z-10">
           <div className="w-1 h-16 md:h-24 bg-gradient-to-b from-orange-500 to-transparent" />
           <p className="text-left text-orange-500 font-bold uppercase tracking-[0.2em] md:tracking-[0.3em] self-center text-sm md:text-base">
-            Elevating every <br/>professional journey
+            {t("home_page3_tagline")}
           </p>
         </div>
       </div>

@@ -46,7 +46,7 @@ const Navbar = ({ addtoref }) => {
             EN
           </button>
           <button
-            onClick={() => { i18n.changeLanguage("hi"); localStorage.setItem("hi", "hi"); }}
+            onClick={() => { i18n.changeLanguage("hi"); localStorage.setItem("lang", "hi"); }}
             className={`px-2 py-[2px] rounded transition leading-none ${i18n.language === 'hi' ? 'bg-orange-500 text-white' : 'hover:bg-neutral-700'}`}
           >
             HI
@@ -65,7 +65,7 @@ const Navbar = ({ addtoref }) => {
               onClick={logout}
               className="text-sm bg-red-600 hover:bg-red-700 px-3 py-1 rounded-md transition-all font-medium"
             >
-              {t("logout") || "Logout"}
+              {t("logout")}
             </button>
           </div>
         ) : (
@@ -74,7 +74,7 @@ const Navbar = ({ addtoref }) => {
             className="flex items-center gap-2 bg-white text-black px-4 py-1 rounded-full text-sm font-semibold hover:bg-gray-200 transition-all shadow-md group"
           >
             <FcGoogle size={18} />
-            <span>Login</span>
+            <span>{t("login")}</span>
           </button>
         )}
       </div>
@@ -119,7 +119,7 @@ const Navbar = ({ addtoref }) => {
               EN
             </button>
             <button
-              onClick={() => { i18n.changeLanguage("hi"); localStorage.setItem("hi", "hi"); }}
+              onClick={() => { i18n.changeLanguage("hi"); localStorage.setItem("lang", "hi"); }}
               className={`px-3 py-1 rounded transition ${i18n.language === 'hi' ? 'bg-orange-500 text-white' : 'hover:bg-neutral-700'}`}
             >
               HI
@@ -132,7 +132,7 @@ const Navbar = ({ addtoref }) => {
               onClick={() => { logout(); closeMenu(); }}
               className="text-sm bg-red-600 hover:bg-red-700 px-4 py-2 rounded-md transition-all font-medium w-fit"
             >
-              {t("logout") || "Logout"}
+              {t("logout")}
             </button>
           ) : (
             <button
@@ -140,7 +140,7 @@ const Navbar = ({ addtoref }) => {
               className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-semibold hover:bg-gray-200 transition-all shadow-md w-fit"
             >
               <FcGoogle size={18} />
-              <span>Login</span>
+              <span>{t("login")}</span>
             </button>
           )}
         </div>

@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useTranslation } from "react-i18next";
 
 const News = () => {
+  const { t } = useTranslation();
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -17,10 +19,10 @@ const News = () => {
         setNews(data.news);
         setLastUpdated(new Date());
       } else {
-        setError("Failed to fetch news");
+        setError(t("news_error_fetch"));
       }
     } catch (err) {
-      setError("Server error");
+      setError(t("news_error_server"));
     } finally {
       setLoading(false);
     }
@@ -36,22 +38,22 @@ const News = () => {
     <div className="pt-[9vh] sm:pt-[7vh] p-4 sm:p-6 bg-black w-full min-h-screen">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-orange-500">
-        Trending in Tech<span className="px-2 text-white text-xs italic">-Powered by HackerNews</span>
+          {t("news_title")}<span className="px-2 text-white text-xs italic">{t("news_powered_by")}</span>
         </h1>
         <button
           onClick={getNews}
           className="bg-orange-500 text-white px-4 py-2 rounded-md hover:bg-orange-600 transition w-fit"
         >
-          Refresh
+          {t("news_refresh")}
         </button>
       </div>
       {lastUpdated && (
         <p className="text-sm text-gray-300 mb-4">
-          Last updated: {lastUpdated.toLocaleTimeString()}
+          {t("news_last_updated")}: {lastUpdated.toLocaleTimeString()}
         </p>
       )}
 
-      {loading && <p className="text-gray-300">Loading news...</p>}
+      {loading && <p className="text-gray-300">{t("news_loading")}</p>}
 
       {error && <p className="text-red-500">{error}</p>}
 
@@ -65,7 +67,7 @@ const News = () => {
               {item.title}
             </h2>
             <p className="text-sm text-black mb-3">
-              by {item.author}
+              {t("news_by_author")} {item.author}
             </p>
             <a
               href={item.url}
@@ -73,7 +75,7 @@ const News = () => {
               rel="noopener noreferrer"
               className="text-white font-medium inline-block transform hover:scale-110 transition duration-200"
             >
-              Read more →
+              {t("news_read_more")}
             </a>
           </div>
         ))}

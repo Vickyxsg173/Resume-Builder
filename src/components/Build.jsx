@@ -2,9 +2,11 @@ import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import html2pdf from "html2pdf.js";
 import { useAuth } from "../context/AuthContext";
+import { useTranslation } from "react-i18next";
 import { FaSave, FaDownload } from "react-icons/fa";
 
 const Build = () => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     contact: "",
@@ -65,11 +67,11 @@ const Build = () => {
           saveResume(formData.name || 'Resume', data.resume).catch(() => {});
         }
       } else {
-        setResume("Error: Invalid response from server");
+        setResume(t("build_error_invalid"));
       }
     } catch (error) {
       console.error("Error:", error);
-      setResume("Error generating resume");
+      setResume(t("build_error_generating"));
     }
 
     setLoading(false);
@@ -93,42 +95,42 @@ const Build = () => {
     try {
       const title = `${formData.name || 'Resume'} - ${new Date().toLocaleDateString()}`;
       await saveResume(title, resume);
-      alert("Resume saved to your profile!");
+      alert(t("build_save_success"));
     } catch (err) {
       console.error(err);
-      alert("Failed to save resume.");
+      alert(t("build_save_fail"));
     }
     setSavingToProfile(false);
   };
 
   return (
     <div className="p-4 sm:p-6 w-full min-h-[100vh] pt-[10vh] sm:pt-[12vh] bg-black">
-      <h2 className="text-3xl font-semibold mb-8 text-center text-white">AI Resume Builder</h2>
+      <h2 className="text-3xl font-semibold mb-8 text-center text-white">{t("build_page_title")}</h2>
 
       <form onSubmit={handleSubmit} className="flex border-2 border-gray-400 flex-col gap-6 bg-black p-8 rounded-lg max-w-3xl mx-auto shadow-lg">
         <input
           name="name"
-          placeholder="Name"
+          placeholder={t("build_name_placeholder")}
           onChange={handleChange}
           required
           className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <input
           name="contact"
-          placeholder="Contact Info (Email, Phone, City)"
+          placeholder={t("build_contact_placeholder")}
           onChange={handleChange}
           required
           className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <input
           name="links"
-          placeholder="Optional Links (GitHub, LinkedIn, Portfolio)"
+          placeholder={t("build_links_placeholder")}
           onChange={handleChange}
           className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <textarea
           name="summary"
-          placeholder="Summary"
+          placeholder={t("build_summary_placeholder")}
           onChange={handleChange}
           required
           rows={4}
@@ -136,27 +138,27 @@ const Build = () => {
         />
         <input
           name="skills"
-          placeholder="Skills (comma separated)"
+          placeholder={t("build_skills_placeholder")}
           onChange={handleChange}
           className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <textarea
           name="experience"
-          placeholder="Experience"
+          placeholder={t("build_experience_placeholder")}
           onChange={handleChange}
           rows={4}
           className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <textarea
           name="projects"
-          placeholder="Projects (comma separated)"
+          placeholder={t("build_projects_placeholder")}
           onChange={handleChange}
           rows={3}
           className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
         <input
           name="education"
-          placeholder="Education"
+          placeholder={t("build_education_placeholder")}
           onChange={handleChange}
           className="border border-green-300 bg-black text-white rounded-md px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400 transition"
         />
@@ -165,7 +167,7 @@ const Build = () => {
           type="submit"
           className="w-40 self-center py-2 rounded-md text-white font-semibold bg-gradient-to-r from-green-400 to-green-600 shadow-md hover:from-green-500 hover:to-green-700 transition"
         >
-          {loading ? "Generating..." : "Generate Resume"}
+          {loading ? t("build_generating") : t("build_generate_btn")}
         </button>
       </form>
 
@@ -179,14 +181,14 @@ const Build = () => {
                 disabled={savingToProfile}
                 className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-md shadow-md transition cursor-pointer flex items-center gap-2 disabled:opacity-50"
               >
-                <FaSave /> {savingToProfile ? "Saving..." : "Save to Profile"}
+                <FaSave /> {savingToProfile ? t("build_saving") : t("build_save_profile")}
               </button>
             )}
             <button
               onClick={downloadPDF}
               className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition cursor-pointer flex items-center gap-2"
             >
-              <FaDownload /> Download PDF
+              <FaDownload /> {t("build_download_pdf")}
             </button>
           </div>
           
@@ -212,7 +214,7 @@ const Build = () => {
                 {resume}
               </ReactMarkdown>
             ) : (
-              <p>Error displaying resume</p>
+              <p>{t("build_error_generating")}</p>
             )}
           </div>
         </div>

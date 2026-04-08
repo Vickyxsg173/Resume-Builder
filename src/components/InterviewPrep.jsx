@@ -3,8 +3,10 @@ import axios from "axios";
 import { FaMicrophone, FaMicrophoneSlash, FaPlay, FaCheckCircle, FaArrowRight } from "react-icons/fa";
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { useTranslation } from "react-i18next";
 
 const InterviewPrep = () => {
+  const { t } = useTranslation();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -52,7 +54,7 @@ const InterviewPrep = () => {
       resetTranscript();
     } catch (error) {
       console.error(error);
-      alert("Failed to start interview");
+      alert(t("interview_failed_start"));
     } finally {
       setLoading(false);
     }
@@ -82,7 +84,7 @@ const InterviewPrep = () => {
       setIsReviewing(true); // Switch to review phase
     } catch (e) {
       console.error(e);
-      alert("Error submitting answer");
+      alert(t("interview_failed_submit"));
     } finally {
       setLoading(false);
     }
@@ -92,14 +94,14 @@ const InterviewPrep = () => {
     <div className="p-4 sm:p-8 pt-[10vh] sm:pt-[12vh] bg-neutral-950 text-white w-full min-h-[100vh] font-sans">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
-          Technical Interview Simulator
+          {t("interview_page_title")}
         </h1>
 
         {!question && (
           <div className="bg-neutral-900 border border-neutral-800 p-10 rounded-xl text-center shadow-lg shadow-black/50">
-            <h2 className="text-xl font-semibold mb-3 text-neutral-200">Ready to test your skills?</h2>
+            <h2 className="text-xl font-semibold mb-3 text-neutral-200">{t("interview_ready_heading")}</h2>
             <p className="text-neutral-400 mb-8 max-w-lg mx-auto">
-              Our AI acts as a senior technical interviewer. It will present you with a question, evaluate your answer, and provide professional feedback.
+              {t("interview_ready_desc")}
             </p>
             <button 
               onClick={fetchNextQuestion} 
@@ -111,7 +113,7 @@ const InterviewPrep = () => {
               ) : (
                 <FaPlay />
               )}
-              {loading ? "Warming up AI..." : "Start Interview"}
+              {loading ? t("interview_warming_up") : t("interview_start_btn")}
             </button>
           </div>
         )}
@@ -121,17 +123,17 @@ const InterviewPrep = () => {
             
             {/* Question Card */}
             <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl shadow-lg shadow-black/50 transition-all">
-              <h2 className="text-sm uppercase tracking-wider text-orange-500 font-bold mb-3">Interviewer Question</h2>
+              <h2 className="text-sm uppercase tracking-wider text-orange-500 font-bold mb-3">{t("interview_question_label")}</h2>
               <p className="text-lg text-neutral-200 leading-relaxed font-medium">{question}</p>
             </div>
 
             {/* Answer Card */}
             <div className={`bg-neutral-900 border transition-colors ${isReviewing ? 'border-neutral-800 opacity-80' : 'border-neutral-700'} p-6 rounded-xl shadow-lg shadow-black/50`}>
-              <h2 className="text-sm uppercase tracking-wider text-emerald-400 font-bold mb-4">Your Answer</h2>
+              <h2 className="text-sm uppercase tracking-wider text-emerald-400 font-bold mb-4">{t("interview_answer_label")}</h2>
               
               {isMicrophoneAvailable === false && !isReviewing && (
                  <div className="text-red-400 bg-red-950/50 border border-red-900 p-3 text-sm rounded-lg mb-4">
-                   Microphone block detected! Please check your System Settings to grant access.
+                   {t("interview_mic_blocked")}
                  </div>
               )}
               
@@ -140,7 +142,7 @@ const InterviewPrep = () => {
                   className="w-full min-h-[22vh] bg-neutral-950 border border-neutral-800 text-neutral-200 p-4 rounded-lg focus:ring-2 focus:ring-emerald-500 transition resize-y outline-none leading-relaxed"
                   value={answer + (listening && transcript ? (answer.trim() ? " " : "") + transcript : "")}
                   onChange={(e) => setAnswer(e.target.value)}
-                  placeholder={isReviewing ? "Your submitted response..." : "Type your answer or click the microphone to speak..."}
+                  placeholder={isReviewing ? t("interview_submitted_placeholder") : t("interview_answer_placeholder")}
                   disabled={listening || isReviewing || loading}
                 />
                 
@@ -153,7 +155,7 @@ const InterviewPrep = () => {
                         ? "bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/40" 
                         : "bg-neutral-800 text-neutral-400 hover:bg-neutral-700 hover:text-white cursor-pointer"
                     }`}
-                    title={listening ? "Stop Listening" : "Start Listening"}
+                    title={listening ? t("interview_listening") : t("interview_answer_placeholder")}
                   >
                     {listening ? <FaMicrophoneSlash size={22} /> : <FaMicrophone size={22} />}
                   </button>
@@ -163,7 +165,7 @@ const InterviewPrep = () => {
               {!isReviewing && (
                 <div className="mt-5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                   <div className="text-neutral-500 italic text-sm min-h-[1.5rem]">
-                    {listening && (transcript ? <span className="text-emerald-400 not-italic">Processing voice...</span> : <span>Listening...</span>)}
+                    {listening && (transcript ? <span className="text-emerald-400 not-italic">{t("interview_processing_voice")}</span> : <span>{t("interview_listening")}</span>)}
                   </div>
                   
                   <button
@@ -174,9 +176,9 @@ const InterviewPrep = () => {
                     {loading ? (
                        <>
                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                         Evaluating...
+                         {t("interview_evaluating")}
                        </>
-                    ) : "Submit Answer"}
+                    ) : t("interview_submit_btn")}
                   </button>
                 </div>
               )}
@@ -186,7 +188,7 @@ const InterviewPrep = () => {
             {isReviewing && feedback && (
               <div className="bg-emerald-950/20 border border-emerald-900/50 p-6 rounded-xl shadow-lg shadow-emerald-900/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h2 className="text-sm uppercase tracking-wider text-emerald-400 font-bold mb-4 flex items-center gap-2">
-                  <FaCheckCircle size={16} /> AI Evaluation & Feedback
+                  <FaCheckCircle size={16} /> {t("interview_feedback_label")}
                 </h2>
                 
                 <div className="bg-neutral-950/50 p-5 rounded-lg border border-neutral-900/50 mb-6">
@@ -199,7 +201,7 @@ const InterviewPrep = () => {
                     disabled={loading}
                     className="bg-blue-600 hover:bg-blue-500 rounded-lg text-white px-8 py-3 font-semibold transition shadow-lg shadow-blue-500/20 flex items-center gap-3 cursor-pointer disabled:opacity-50"
                   >
-                    {loading ? "Wrapping up..." : "Next Question"} <FaArrowRight />
+                    {loading ? t("interview_wrapping") : t("interview_next_btn")} <FaArrowRight />
                   </button>
                 </div>
               </div>

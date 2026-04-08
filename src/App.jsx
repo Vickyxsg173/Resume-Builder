@@ -149,7 +149,7 @@ function App(){
                 ))}
                 {loading && (
                   <div className="flex items-center gap-2">
-                    <p className="text-xs">Typing</p>
+                    <p className="text-xs">{t("ai_chat_typing")}</p>
                     <div className="flex flex-row gap-1">
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-bounce"></div>
                       <div className="w-2 h-2 rounded-full bg-red-500 animate-bounce [animation-delay:-.3s]"></div>
