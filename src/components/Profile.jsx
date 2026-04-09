@@ -153,7 +153,7 @@ const AdminUserRow = ({ user, onUpdate, isUpdating, t }) => {
             type="number"
             value={genLimit}
             onChange={(e) => setGenLimit(e.target.value)}
-            className="w-11 bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-[11px] text-center text-orange-400 font-mono"
+            className="w-16 bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-[11px] text-center text-orange-400 font-mono"
             title="Resume Limit"
           />
           <span className="text-neutral-600 text-[10px]">/</span>
@@ -161,7 +161,7 @@ const AdminUserRow = ({ user, onUpdate, isUpdating, t }) => {
             type="number"
             value={intLimit}
             onChange={(e) => setIntLimit(e.target.value)}
-            className="w-11 bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-[11px] text-center text-blue-400 font-mono"
+            className="w-16 bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-[11px] text-center text-blue-400 font-mono"
             title="Interview Limit"
           />
         </div>
