@@ -95,14 +95,14 @@ const AdminUserCard = ({ user, onUpdate, isUpdating, t }) => {
               type="number"
               value={genLimit}
               onChange={(e) => setGenLimit(e.target.value)}
-              className="w-full bg-transparent text-[11px] text-center text-orange-400 font-mono focus:outline-none"
+              className="w-full bg-transparent text-sm text-center text-orange-400 font-mono focus:outline-none"
             />
             <span className="text-neutral-700">|</span>
             <input
               type="number"
               value={intLimit}
               onChange={(e) => setIntLimit(e.target.value)}
-              className="w-full bg-transparent text-[11px] text-center text-blue-400 font-mono focus:outline-none"
+              className="w-full bg-transparent text-sm text-center text-blue-400 font-mono focus:outline-none"
             />
           </div>
         </div>
@@ -441,12 +441,12 @@ const Profile = () => {
         </div>
 
         {/* ── Tab Navigation ── */}
-        <div className="flex gap-1 bg-neutral-900 border border-neutral-800 rounded-2xl p-1 mb-6">
+        <div className="flex gap-1 bg-neutral-900 border border-neutral-800 rounded-2xl p-1 mb-6 overflow-x-auto no-scrollbar scroll-smooth">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-semibold transition-all ${
+              className={`flex-shrink-0 sm:flex-1 flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/25'
                   : 'text-neutral-400 hover:text-white'
@@ -505,27 +505,27 @@ const Profile = () => {
                 </div>
 
                 {!user?.isAdmin && !user?.isPremium && (
-                  <div className="mt-4 bg-gradient-to-r from-emerald-900/40 to-emerald-800/10 border border-emerald-500/40 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-5 transition-all hover:border-emerald-500/70 shadow-lg shadow-emerald-900/20">
-                    <div className="text-center sm:text-left">
+                  <div className="mt-4 bg-gradient-to-r from-emerald-900/40 to-emerald-800/10 border border-emerald-500/40 rounded-xl p-5 flex flex-col lg:flex-row items-center justify-between gap-5 transition-all hover:border-emerald-500/70 shadow-lg shadow-emerald-900/20">
+                    <div className="text-center lg:text-left">
                       <h4 className="text-emerald-400 font-bold text-lg mb-1">{t("premium_title")}</h4>
                       <p className="text-neutral-400 text-sm max-w-sm">{t("premium_profile_desc")}</p>
                     </div>
-                    <div className="flex flex-col items-center sm:items-end gap-2 shrink-0">
-                      <div className="flex gap-2">
+                    <div className="flex flex-col items-center lg:items-end gap-3 shrink-0 w-full lg:w-auto">
+                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <button 
                           onClick={() => handleUpgrade('monthly')}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-full text-sm shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-sm shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap flex-1 sm:flex-none"
                         >
                           {t("premium_upgrade_btn")} (Monthly)
                         </button>
                         <button 
                           onClick={() => handleUpgrade('yearly')}
-                          className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold px-4 py-2 rounded-full text-sm shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
+                          className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold px-6 py-2.5 rounded-full text-sm shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap flex-1 sm:flex-none"
                         >
                           {t("premium_upgrade_btn")} (Yearly)
                         </button>
                       </div>
-                      <span className="text-xs text-emerald-400/80 font-medium tracking-wide">
+                      <span className="text-xs text-emerald-400/80 font-medium tracking-wide text-center lg:text-right">
                         {t("premium_monthly")} {t("premium_monthly_sub")} • {t("premium_yearly").replace("or ", "")}
                       </span>
                     </div>
@@ -857,8 +857,8 @@ const Profile = () => {
               </div>
 
               {/* Scrollable Content */}
-              <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-neutral-950/30">
-                <div id="resume-content-modal" className="bg-white text-black p-8 md:p-12 shadow-inner rounded-sm mx-auto max-w-[21cm] min-h-[29.7cm]">
+              <div className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-10 bg-neutral-950/30">
+                <div id="resume-content-modal" className="bg-white text-black p-6 sm:p-8 md:p-12 shadow-inner rounded-sm mx-auto max-w-full md:max-w-[21cm] min-h-[29.7cm]">
                   <ReactMarkdown
                     components={{
                       h1: ({ children }) => <h1 className="text-3xl font-bold text-center mb-4 uppercase tracking-wider border-b-2 border-black pb-2">{children}</h1>,
