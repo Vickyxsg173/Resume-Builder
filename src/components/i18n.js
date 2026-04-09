@@ -175,14 +175,28 @@ i18n
 
           // Premium
           premium_title: "🚀 Upgrade to Premium",
-          premium_desc_resume: "You've reached your daily generation limit. Upgrade to unlock unlimited AI resumes and empower your career journey!",
-          premium_desc_interview: "You've reached your daily interview limit. Upgrade to unlock unlimited interview sessions and master your skills!",
-          premium_profile_desc: "Upgrade to our Premium tier to unlock unlimited AI resumes and interview sessions!",
+          premium_desc_resume: "You've reached your daily generation limit. Upgrade to Monthly (10/day) or Yearly (20/day) to empower your career journey!",
+          premium_desc_interview: "You've reached your daily interview limit. Upgrade to Monthly (30/day) or Yearly (50/day) to master your skills!",
+          premium_profile_desc: "Upgrade to our Monthly or Yearly Premium tiers to unlock higher daily limits for AI resumes and interview sessions!",
+          premium_monthly_tier: "Monthly Premium",
+          premium_yearly_tier: "Yearly Premium",
           premium_tier: "Premium Tier",
           premium_monthly: "₹199",
           premium_monthly_sub: "/ month",
           premium_yearly: "or ₹2299 / year",
           premium_upgrade_btn: "Upgrade Now",
+          
+          // Admin Panel
+          admin_panel_title: "Admin Dashboard",
+          admin_search_placeholder: "Search users by name or email...",
+          admin_user_name: "Name",
+          admin_user_email: "Email",
+          admin_user_tier: "Tier",
+          admin_user_limits: "Limits (Gen / Int)",
+          admin_save_btn: "Save Changes",
+          admin_no_users: "No users found matching your search.",
+          admin_update_success: "User updated successfully!",
+          admin_update_fail: "Failed to update user",
         }
       },
       hi: {
@@ -353,14 +367,28 @@ i18n
 
           // Premium
           premium_title: "🚀 प्रीमियम में अपग्रेड करें",
-          premium_desc_resume: "आप अपनी दैनिक जनरेशन सीमा तक पहुँच गए हैं। असीमित AI रिज़्यूमे अनलॉक करने और अपने करियर को सशक्त बनाने के लिए अपग्रेड करें!",
-          premium_desc_interview: "आप अपनी दैनिक इंटरव्यू सीमा तक पहुँच गए हैं। असीमित इंटरव्यू सत्रों को अनलॉक करने और अपने कौशल में महारत हासिल करने के लिए अपग्रेड करें!",
-          premium_profile_desc: "असीमित AI रिज़्यूमे और इंटरव्यू सत्रों को अनलॉक करने के लिए हमारे प्रीमियम टियर में अपग्रेड करें!",
+          premium_desc_resume: "आप अपनी दैनिक जनरेशन सीमा तक पहुँच गए हैं। अपने करियर को सशक्त बनाने के लिए मासिक (10/दिन) या वार्षिक (20/दिन) में अपग्रेड करें!",
+          premium_desc_interview: "आप अपनी दैनिक इंटरव्यू सीमा तक पहुँच गए हैं। अपने कौशल में महारत हासिल करने के लिए मासिक (30/दिन) या वार्षिक (50/दिन) में अपग्रेड करें!",
+          premium_profile_desc: "असीमित AI रिज़्यूमे और इंटरव्यू सत्रों के लिए हमारे मासिक या वार्षिक प्रीमियम टियर में अपग्रेड करें!",
+          premium_monthly_tier: "मासिक प्रीमियम",
+          premium_yearly_tier: "वार्षिक प्रीमियम",
           premium_tier: "प्रीमियम टियर",
           premium_monthly: "₹199",
           premium_monthly_sub: "/ महीना",
           premium_yearly: "या ₹2299 / वर्ष",
           premium_upgrade_btn: "अभी अपग्रेड करें",
+          
+          // Admin Panel
+          admin_panel_title: "एडमिन डैशबोर्ड",
+          admin_search_placeholder: "नाम या ईमेल से खोजें...",
+          admin_user_name: "नाम",
+          admin_user_email: "ईमेल",
+          admin_user_tier: "स्तर",
+          admin_user_limits: "सीमा (Gen / Int)",
+          admin_save_btn: "बदलाव सेव करें",
+          admin_no_users: "आपकी खोज से कोई उपयोगकर्ता नहीं मिला।",
+          admin_update_success: "उपयोगकर्ता सफलतापूर्वक अपडेट किया गया!",
+          admin_update_fail: "उपयोगकर्ता अपडेट करने में विफल",
         }
       }
     },

@@ -10,7 +10,7 @@ import {
   FaUserEdit, FaSave, FaTrash, FaBriefcase,
   FaFileAlt, FaCrown, FaSignInAlt, FaChartBar,
   FaCalendarAlt, FaCheckCircle, FaInbox,
-  FaTimes, FaDownload
+  FaTimes, FaDownload, FaSearch, FaUserCog
 } from 'react-icons/fa';
 
 const StatCard = ({ icon, label, value, max, color, remainingText }) => {
@@ -54,6 +54,133 @@ const StatCard = ({ icon, label, value, max, color, remainingText }) => {
   );
 };
 
+const AdminUserCard = ({ user, onUpdate, isUpdating, t }) => {
+  const [tier, setTier] = useState(user.premiumType || 'none');
+  const [genLimit, setGenLimit] = useState(user.generationLimit || 5);
+  const [intLimit, setIntLimit] = useState(user.interviewLimit || 15);
+
+  const hasChanges = tier !== user.premiumType || 
+                     Number(genLimit) !== user.generationLimit || 
+                     Number(intLimit) !== user.interviewLimit;
+
+  return (
+    <div className="bg-neutral-800/40 border border-neutral-700/50 rounded-2xl p-4 flex flex-col gap-4">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="font-bold text-white">{user.displayName}</div>
+          <div className="text-xs text-neutral-500">{user.email}</div>
+        </div>
+        <div className="text-[10px] text-neutral-600 bg-neutral-900 px-2 py-1 rounded-md">
+          ID: {user._id.slice(-6)}
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase text-neutral-500 font-bold">{t("admin_user_tier")}</label>
+          <select
+            value={tier}
+            onChange={(e) => setTier(e.target.value)}
+            className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-2 py-2 text-xs focus:outline-none focus:border-orange-500 text-neutral-300"
+          >
+            <option value="none">{t("profile_free")}</option>
+            <option value="monthly">Monthly Premium</option>
+            <option value="yearly">Yearly Premium</option>
+          </select>
+        </div>
+        <div className="space-y-1">
+          <label className="text-[10px] uppercase text-neutral-500 font-bold">{t("admin_user_limits")}</label>
+          <div className="flex items-center gap-1.5 bg-neutral-900 border border-neutral-700 rounded-xl px-2 py-1.5">
+            <input
+              type="number"
+              value={genLimit}
+              onChange={(e) => setGenLimit(e.target.value)}
+              className="w-full bg-transparent text-[11px] text-center text-orange-400 font-mono focus:outline-none"
+            />
+            <span className="text-neutral-700">|</span>
+            <input
+              type="number"
+              value={intLimit}
+              onChange={(e) => setIntLimit(e.target.value)}
+              className="w-full bg-transparent text-[11px] text-center text-blue-400 font-mono focus:outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
+      {hasChanges && (
+        <button
+          onClick={() => onUpdate(user._id, { premiumType: tier, generationLimit: genLimit, interviewLimit: intLimit })}
+          disabled={isUpdating}
+          className="w-full bg-orange-600 hover:bg-orange-500 text-white text-xs uppercase tracking-wider font-black py-2.5 rounded-xl transition-all shadow-lg shadow-orange-600/20"
+        >
+          {isUpdating ? '...' : t("admin_save_btn")}
+        </button>
+      )}
+    </div>
+  );
+};
+
+const AdminUserRow = ({ user, onUpdate, isUpdating, t }) => {
+  const [tier, setTier] = useState(user.premiumType || 'none');
+  const [genLimit, setGenLimit] = useState(user.generationLimit || 5);
+  const [intLimit, setIntLimit] = useState(user.interviewLimit || 15);
+
+  const hasChanges = tier !== user.premiumType || 
+                     Number(genLimit) !== user.generationLimit || 
+                     Number(intLimit) !== user.interviewLimit;
+
+  return (
+    <tr className="hover:bg-white/5 transition-colors">
+      <td className="px-4 py-4">
+        <div className="font-bold text-sm text-neutral-200">{user.displayName}</div>
+        <div className="text-[10px] text-neutral-500">{user.email}</div>
+      </td>
+      <td className="px-4 py-4">
+        <select
+          value={tier}
+          onChange={(e) => setTier(e.target.value)}
+          className="bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-orange-500 text-neutral-300"
+        >
+          <option value="none">{t("profile_free")}</option>
+          <option value="monthly">Monthly Premium</option>
+          <option value="yearly">Yearly Premium</option>
+        </select>
+      </td>
+      <td className="px-4 py-4">
+        <div className="flex items-center gap-1.5">
+          <input
+            type="number"
+            value={genLimit}
+            onChange={(e) => setGenLimit(e.target.value)}
+            className="w-11 bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-[11px] text-center text-orange-400 font-mono"
+            title="Resume Limit"
+          />
+          <span className="text-neutral-600 text-[10px]">/</span>
+          <input
+            type="number"
+            value={intLimit}
+            onChange={(e) => setIntLimit(e.target.value)}
+            className="w-11 bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-[11px] text-center text-blue-400 font-mono"
+            title="Interview Limit"
+          />
+        </div>
+      </td>
+      <td className="px-4 py-4 text-right">
+        {hasChanges && (
+          <button
+            onClick={() => onUpdate(user._id, { premiumType: tier, generationLimit: genLimit, interviewLimit: intLimit })}
+            disabled={isUpdating}
+            className="bg-orange-600 hover:bg-orange-500 text-white text-[10px] uppercase tracking-tighter font-black px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
+          >
+            {isUpdating ? '...' : t("admin_save_btn")}
+          </button>
+        )}
+      </td>
+    </tr>
+  );
+};
+
 const Profile = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -62,6 +189,9 @@ const Profile = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [credits, setCredits] = useState(null);
   const [messages, setMessages] = useState([]);
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [adminSearch, setAdminSearch] = useState('');
+  const [isUpdatingUser, setIsUpdatingUser] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -225,11 +355,41 @@ const Profile = () => {
     }
   };
 
+  const handleAdminUpdateUser = async (userId, updateData) => {
+    setIsUpdatingUser(userId);
+    try {
+      await axios.patch(`/api/admin/users/${userId}`, updateData);
+      alert(t("admin_update_success"));
+      fetchAdminUsers(); 
+    } catch (err) {
+      console.error(err);
+      alert(t("admin_update_fail"));
+    } finally {
+      setIsUpdatingUser(null);
+    }
+  };
+
+  const fetchAdminUsers = async () => {
+    try {
+      const { data } = await axios.get('/api/admin/users');
+      setAdminUsers(data);
+    } catch (err) { console.error(err); }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'admin' && user?.isAdmin) {
+      fetchAdminUsers();
+    }
+  }, [activeTab, user?.isAdmin]);
+
   const tabs = [
     { id: 'overview', label: t("profile_tab_overview"), icon: <FaChartBar /> },
     { id: 'resumes', label: `${t("profile_tab_resumes")} (${user?.savedResumes?.length || 0})`, icon: <FaFileAlt /> },
     { id: 'skills', label: t("profile_tab_skills"), icon: <FaBriefcase /> },
-    ...(user?.isAdmin ? [{ id: 'inbox', label: `Inbox (${messages.length})`, icon: <FaInbox /> }] : [])
+    ...(user?.isAdmin ? [
+      { id: 'inbox', label: `Inbox (${messages.length})`, icon: <FaInbox /> },
+      { id: 'admin', label: t("admin_panel_title"), icon: <FaUserCog /> }
+    ] : [])
   ];
 
   return (
@@ -261,7 +421,11 @@ const Profile = () => {
               <p className="text-neutral-400 mt-1">{user.email}</p>
               <div className="flex flex-wrap gap-2 mt-3 justify-center sm:justify-start">
                 <span className="bg-orange-500/15 text-orange-400 border border-orange-500/30 px-3 py-1 rounded-full text-xs font-semibold">
-                  {user.isAdmin ? `👑 ${t("profile_admin_badge")}` : t("profile_free_tier")}
+                  {user.isAdmin ? `👑 ${t("profile_admin_badge")}` : (
+                    user.isPremium ? (
+                      user.premiumType === 'yearly' ? `💎 ${t("premium_yearly_tier")}` : `✨ ${t("premium_monthly_tier")}`
+                    ) : t("profile_free_tier")
+                  )}
                 </span>
                 <span className="bg-blue-500/15 text-blue-400 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold">
                   <FaCalendarAlt className="inline mr-1" />
@@ -302,7 +466,7 @@ const Profile = () => {
                   icon={<FaFileAlt />}
                   label={t("profile_stat_resume_gen")}
                   value={credits?.generationsUsed ?? user.generationsUsed ?? 0}
-                  max={credits?.isAdmin ? Infinity : (credits?.generationLimit ?? 10)}
+                  max={credits?.generationLimit ?? (credits?.isAdmin ? Infinity : 5)}
                   color="orange"
                   remainingText={t("profile_stat_remaining")}
                 />
@@ -310,7 +474,7 @@ const Profile = () => {
                   icon={<FaBriefcase />}
                   label={t("profile_stat_interviews")}
                   value={credits?.interviewsUsed ?? user.interviewsUsed ?? 0}
-                  max={credits?.isAdmin ? Infinity : (credits?.interviewLimit ?? 20)}
+                  max={credits?.interviewLimit ?? (credits?.isAdmin ? Infinity : 15)}
                   color="blue"
                   remainingText={t("profile_stat_remaining")}
                 />
@@ -324,7 +488,14 @@ const Profile = () => {
                     { label: t("profile_stat_resumes_saved"), value: user?.savedResumes?.length || 0 },
                     { label: t("profile_stat_skills_listed"), value: user?.skills?.length || 0 },
                     { label: t("profile_stat_gen_used"), value: credits?.generationsUsed ?? 0 },
-                    { label: t("profile_stat_account_type"), value: user?.isAdmin ? t("profile_admin") : t("profile_free") },
+                    { 
+                      label: t("profile_stat_account_type"), 
+                      value: user?.isAdmin ? t("profile_admin") : (
+                        user?.isPremium ? (
+                          user?.premiumType === 'yearly' ? t("premium_yearly_tier") : t("premium_monthly_tier")
+                        ) : t("profile_free")
+                      )
+                    },
                   ].map((item, i) => (
                     <div key={i} className="bg-neutral-800/50 rounded-xl p-4">
                       <div className="text-2xl font-black text-orange-400">{item.value}</div>
@@ -536,6 +707,85 @@ const Profile = () => {
                     <p className="text-neutral-500 text-sm">{t("profile_no_skills")}</p>
                   )}
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {activeTab === 'admin' && user?.isAdmin && (
+            <motion.div key="admin" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <div className="bg-neutral-900 border border-neutral-800 rounded-3xl p-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                  <h3 className="text-xl font-bold flex items-center gap-2">
+                    <FaUserCog className="text-orange-500" /> {t("admin_panel_title")}
+                  </h3>
+                  <div className="relative max-w-sm w-full">
+                    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" />
+                    <input
+                      type="text"
+                      placeholder={t("admin_search_placeholder")}
+                      value={adminSearch}
+                      onChange={(e) => setAdminSearch(e.target.value)}
+                      className="w-full bg-neutral-800 border border-neutral-700 rounded-xl px-10 py-2.5 text-sm focus:outline-none focus:border-orange-500 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* 💻 Desktop View: Table */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-neutral-800 text-neutral-500 text-xs uppercase tracking-wider">
+                        <th className="px-4 py-3 pb-4 font-semibold">{t("admin_user_name")}</th>
+                        <th className="px-4 py-3 pb-4 font-semibold">{t("admin_user_tier")}</th>
+                        <th className="px-4 py-3 pb-4 font-semibold">{t("admin_user_limits")}</th>
+                        <th className="px-4 py-3 pb-4 text-right"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-800/50">
+                      {adminUsers
+                        .filter(u => 
+                          u.displayName.toLowerCase().includes(adminSearch.toLowerCase()) || 
+                          u.email.toLowerCase().includes(adminSearch.toLowerCase())
+                        )
+                        .map(u => (
+                          <AdminUserRow 
+                            key={u._id} 
+                            user={u} 
+                            onUpdate={handleAdminUpdateUser} 
+                            isUpdating={isUpdatingUser === u._id}
+                            t={t}
+                          />
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 📱 Mobile View: Cards */}
+                <div className="md:hidden space-y-4">
+                  {adminUsers
+                    .filter(u => 
+                      u.displayName.toLowerCase().includes(adminSearch.toLowerCase()) || 
+                      u.email.toLowerCase().includes(adminSearch.toLowerCase())
+                    )
+                    .map(u => (
+                      <AdminUserCard 
+                        key={u._id} 
+                        user={u} 
+                        onUpdate={handleAdminUpdateUser} 
+                        isUpdating={isUpdatingUser === u._id}
+                        t={t}
+                      />
+                    ))}
+                </div>
+
+                {adminUsers.filter(u => 
+                  u.displayName.toLowerCase().includes(adminSearch.toLowerCase()) || 
+                  u.email.toLowerCase().includes(adminSearch.toLowerCase())
+                ).length === 0 && (
+                  <div className="text-center py-12 text-neutral-500 text-sm">
+                    {t("admin_no_users")}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

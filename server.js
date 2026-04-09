@@ -61,16 +61,18 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com", "https://*.razorpay.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://*.razorpay.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "https://lh3.googleusercontent.com", "https://www.gstatic.com", "https://*.razorpay.com"],
       connectSrc: ["'self'", "https://openrouter.ai", "https://hacker-news.firebaseio.com", "https://api.razorpay.com", "https://*.razorpay.com"],
       frameSrc: ["'self'", "https://api.razorpay.com", "https://*.razorpay.com"],
+      formAction: ["'self'", "https://api.razorpay.com", "https://*.razorpay.com"],
     },
   },
-
   crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: { policy: "unsafe-none" },
 }));
 app.set('trust proxy', 1);
 
@@ -234,6 +236,22 @@ const checkAndResetCredits = async (req, res, next) => {
   next();
 };
 
+// 📊 Tiered Limits Helper
+const getTierLimits = (user) => {
+  if (user.isAdmin) return { generationLimit: Infinity, interviewLimit: Infinity, tierName: "Admin" };
+  
+  let name = "Free";
+  if (user.isPremium) {
+    name = user.premiumType === "yearly" ? "Yearly Premium" : "Monthly Premium";
+  }
+  
+  return { 
+    generationLimit: user.generationLimit || 5, 
+    interviewLimit: user.interviewLimit || 15, 
+    tierName: name 
+  };
+};
+
 // 👑 Admin Authentication Middleware
 const ensureAdmin = (req, res, next) => {
   if (req.isAuthenticated() && req.user.isAdmin) {
@@ -287,14 +305,17 @@ app.delete("/api/profile/resumes/:resumeId", ensureAuth, async (req, res) => {
 app.get("/api/profile/credits", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
+    const limits = getTierLimits(user);
+    
     res.json({
       isAdmin: user.isAdmin,
       generationsUsed: user.generationsUsed,
-      generationLimit: (user.isAdmin || user.isPremium) ? Infinity : user.generationLimit,
+      generationLimit: limits.generationLimit,
       interviewsUsed: user.interviewsUsed,
-      interviewLimit: (user.isAdmin || user.isPremium) ? Infinity : user.interviewLimit,
+      interviewLimit: limits.interviewLimit,
       isPremium: user.isPremium,
       premiumType: user.premiumType,
+      tierName: limits.tierName
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch credits" });
@@ -345,9 +366,15 @@ app.post("/payment/verify", ensureAuth, async (req, res) => {
 
   if (expectedSignature === razorpay_signature) {
     try {
+      // Set limits based on plan
+      const genLimit = plan === 'yearly' ? 20 : 10;
+      const intLimit = plan === 'yearly' ? 50 : 30;
+
       await User.findByIdAndUpdate(req.user._id, {
         isPremium: true,
         premiumType: plan,
+        generationLimit: genLimit,
+        interviewLimit: intLimit
       });
       res.json({ success: true, message: "Payment verified & Premium activated!" });
     } catch (err) {
@@ -367,16 +394,49 @@ app.post("/payment/verify", ensureAuth, async (req, res) => {
   }
 });
 
+// 🛠️ Admin Dashboard Endpoints
+app.get("/api/admin/users", ensureAdmin, async (req, res) => {
+  try {
+    const users = await User.find({}, "displayName email isPremium premiumType generationLimit interviewLimit createdAt").sort({ createdAt: -1 });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch users" });
+  }
+});
+
+app.patch("/api/admin/users/:userId", ensureAdmin, async (req, res) => {
+  try {
+    const { premiumType, generationLimit, interviewLimit } = req.body;
+    const isPremium = premiumType !== "none";
+    
+    const user = await User.findByIdAndUpdate(
+      req.params.userId,
+      { 
+        isPremium, 
+        premiumType, 
+        generationLimit: Number(generationLimit), 
+        interviewLimit: Number(interviewLimit) 
+      },
+      { new: true }
+    );
+    
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update user" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 
 // 🔥 MAIN ROUTE — Auth required: history tracking + prevents API abuse
 app.post("/generate-resume", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
     // 🛡️ Limit Enforcement
-    if (!req.user.isAdmin && !req.user.isPremium && req.user.generationsUsed >= req.user.generationLimit) {
+    const limits = getTierLimits(req.user);
+    if (!req.user.isAdmin && req.user.generationsUsed >= limits.generationLimit) {
       return res.status(403).json({ 
         success: false, 
-        message: "Daily resume generation limit reached (5/day). Upgrade to unlock unlimited!" 
+        message: `Daily resume generation limit reached (${limits.generationLimit}/day). Upgrade for more!` 
       });
     }
 
@@ -469,9 +529,10 @@ Return ONLY the final resume markdown text. Do not output any conversational fil
 app.get("/api/interview/start", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
     // 🛡️ Limit Enforcement
-    if (!req.user.isAdmin && !req.user.isPremium && req.user.interviewsUsed >= req.user.interviewLimit) {
+    const limits = getTierLimits(req.user);
+    if (!req.user.isAdmin && req.user.interviewsUsed >= limits.interviewLimit) {
       return res.status(403).json({ 
-        error: "Daily interview limit reached (15/day). Upgrade to unlock unlimited!" 
+        error: `Daily interview limit reached (${limits.interviewLimit}/day). Upgrade for more!` 
       });
     }
 
