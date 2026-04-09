@@ -172,6 +172,17 @@ i18n
           profile_no_skills: "No skills added yet. Add your first skill above!",
           profile_admin_badge: "Admin Account",
           profile_free_tier: "Free Tier",
+
+          // Premium
+          premium_title: "🚀 Upgrade to Premium",
+          premium_desc_resume: "You've reached your daily generation limit. Upgrade to unlock unlimited AI resumes and empower your career journey!",
+          premium_desc_interview: "You've reached your daily interview limit. Upgrade to unlock unlimited interview sessions and master your skills!",
+          premium_profile_desc: "Upgrade to our Premium tier to unlock unlimited AI resumes and interview sessions!",
+          premium_tier: "Premium Tier",
+          premium_monthly: "₹199",
+          premium_monthly_sub: "/ month",
+          premium_yearly: "or ₹2299 / year",
+          premium_upgrade_btn: "Upgrade Now",
         }
       },
       hi: {
@@ -339,6 +350,17 @@ i18n
           profile_no_skills: "अभी तक कोई कौशल नहीं जोड़ा गया। ऊपर अपना पहला कौशल जोड़ें!",
           profile_admin_badge: "एडमिन खाता",
           profile_free_tier: "मुफ्त स्तर",
+
+          // Premium
+          premium_title: "🚀 प्रीमियम में अपग्रेड करें",
+          premium_desc_resume: "आप अपनी दैनिक जनरेशन सीमा तक पहुँच गए हैं। असीमित AI रिज़्यूमे अनलॉक करने और अपने करियर को सशक्त बनाने के लिए अपग्रेड करें!",
+          premium_desc_interview: "आप अपनी दैनिक इंटरव्यू सीमा तक पहुँच गए हैं। असीमित इंटरव्यू सत्रों को अनलॉक करने और अपने कौशल में महारत हासिल करने के लिए अपग्रेड करें!",
+          premium_profile_desc: "असीमित AI रिज़्यूमे और इंटरव्यू सत्रों को अनलॉक करने के लिए हमारे प्रीमियम टियर में अपग्रेड करें!",
+          premium_tier: "प्रीमियम टियर",
+          premium_monthly: "₹199",
+          premium_monthly_sub: "/ महीना",
+          premium_yearly: "या ₹2299 / वर्ष",
+          premium_upgrade_btn: "अभी अपग्रेड करें",
         }
       }
     },

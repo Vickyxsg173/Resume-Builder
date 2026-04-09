@@ -82,6 +82,12 @@ const Build = () => {
       });
 
       const data = await response.json();
+      if (response.status === 403) {
+        setResume("PREMIUM_LIMIT_REACHED");
+        setLoading(false);
+        return;
+      }
+
       if (data && data.resume) {
         setResume(data.resume);
         // 🔖 Auto-save to profile if logged in
@@ -218,7 +224,20 @@ const Build = () => {
               fontFamily: "'Times New Roman', Times, serif"
             }}
           >
-            {typeof resume === "string" ? (
+            {resume === "PREMIUM_LIMIT_REACHED" ? (
+              <div className="flex flex-col items-center justify-center h-full text-center p-6 sm:p-10 bg-gray-50 border border-emerald-400 rounded-xl m-4 sm:m-8 shadow-inner">
+                 <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-800 mb-4">{t("premium_title")}</h2>
+                 <p className="text-gray-600 text-base sm:text-lg mb-8 max-w-md">{t("premium_desc_resume")}</p>
+                 <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-8 w-full max-w-sm mx-auto transition-transform hover:scale-105">
+                   <p className="text-xl font-bold text-gray-800 mb-2">{t("premium_tier")}</p>
+                   <p className="text-3xl text-emerald-600 font-black mb-1">{t("premium_monthly")} <span className="text-base text-gray-500 font-medium">{t("premium_monthly_sub")}</span></p>
+                   <p className="text-md text-gray-500 font-medium">{t("premium_yearly")}</p>
+                 </div>
+                 <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+                   {t("premium_upgrade_btn")}
+                 </button>
+              </div>
+            ) : typeof resume === "string" ? (
               <ReactMarkdown
                 components={{
                   h1: ({ children }) => <h1 className="text-3xl font-bold text-center mb-4 uppercase tracking-wider border-b-2 border-black pb-2">{children}</h1>,

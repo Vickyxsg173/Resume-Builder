@@ -276,6 +276,23 @@ const Profile = () => {
                     </div>
                   ))}
                 </div>
+
+                {!user?.isAdmin && (
+                  <div className="mt-4 bg-gradient-to-r from-emerald-900/40 to-emerald-800/10 border border-emerald-500/40 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-5 transition-all hover:border-emerald-500/70 shadow-lg shadow-emerald-900/20">
+                    <div className="text-center sm:text-left">
+                      <h4 className="text-emerald-400 font-bold text-lg mb-1">{t("premium_title")}</h4>
+                      <p className="text-neutral-400 text-sm max-w-sm">{t("premium_profile_desc")}</p>
+                    </div>
+                    <div className="flex flex-col items-center sm:items-end gap-2 shrink-0">
+                      <button className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold px-8 py-2.5 rounded-full shadow-lg hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 whitespace-nowrap">
+                        {t("premium_upgrade_btn")}
+                      </button>
+                      <span className="text-xs text-emerald-400/80 font-medium tracking-wide">
+                        {t("premium_monthly")} {t("premium_monthly_sub")} {t("premium_yearly").replace("or ", "• ")}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

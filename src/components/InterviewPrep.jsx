@@ -56,7 +56,11 @@ const InterviewPrep = () => {
       resetTranscript();
     } catch (error) {
       console.error(error);
-      alert(t("interview_failed_start"));
+      if (error.response && error.response.status === 403) {
+        setQuestion("PREMIUM_LIMIT_REACHED");
+      } else {
+        alert(t("interview_failed_start"));
+      }
     } finally {
       setLoading(false);
     }
@@ -120,7 +124,22 @@ const InterviewPrep = () => {
           </div>
         )}
 
-        {question && (
+        {question === "PREMIUM_LIMIT_REACHED" && (
+           <div className="bg-neutral-900 border border-emerald-500/50 p-8 sm:p-12 rounded-xl shadow-2xl text-center shadow-black/50 mx-auto max-w-2xl mt-8">
+               <h2 className="text-3xl font-bold text-emerald-400 mb-4">{t("premium_title")}</h2>
+               <p className="text-neutral-300 text-lg mb-8 max-w-md mx-auto">{t("premium_desc_interview")}</p>
+               <div className="bg-neutral-950 p-6 rounded-xl border border-emerald-900 mb-8 mx-auto w-full max-w-sm transition-transform hover:scale-105 shadow-inner">
+                 <p className="text-xl font-semibold mb-2 text-white">{t("premium_tier")}</p>
+                 <p className="text-3xl text-emerald-400 font-bold mb-1">{t("premium_monthly")} <span className="text-sm text-neutral-400 font-normal">{t("premium_monthly_sub")}</span></p>
+                 <p className="text-md text-neutral-400">{t("premium_yearly")}</p>
+               </div>
+               <button className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 px-8 py-3 text-white rounded-full font-bold text-lg shadow-lg hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-1">
+                 {t("premium_upgrade_btn")}
+               </button>
+           </div>
+        )}
+
+        {question && question !== "PREMIUM_LIMIT_REACHED" && (
           <div className="space-y-6">
             
             {/* Question Card */}
