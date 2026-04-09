@@ -35,7 +35,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 // 🔍 Environment Variable Validation
-const requiredEnv = ['OPENROUTER_API_KEY', 'MONGODB_URI', 'SESSION_SECRET'];
+const requiredEnv = ['OPENROUTER_API_KEY', 'MONGODB_URI', 'SESSION_SECRET', 'RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET'];
 requiredEnv.forEach(key => {
   if (!process.env[key]) {
     console.warn(`⚠️  WARNING: Environment variable ${key} is missing!`);
@@ -46,10 +46,13 @@ const openrouter = new OpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
 });
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+let razorpay;
+if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+  razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
+  });
+}
 
 const app = express();
 
@@ -298,6 +301,9 @@ app.get("/api/profile/credits", ensureAuth, checkAndResetCredits, async (req, re
 
 // 💳 Razorpay Payment Routes
 app.post("/payment/create-order", ensureAuth, async (req, res) => {
+  if (!razorpay) {
+    return res.status(503).json({ error: "Payment gateway is not configured" });
+  }
   const { plan } = req.body; // 'monthly' or 'yearly'
   const amount = plan === "monthly" ? 19900 : 229900; // In paise (₹199 or ₹2299)
 
