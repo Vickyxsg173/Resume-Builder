@@ -13,6 +13,8 @@ import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import path from "path";
 import { fileURLToPath } from 'url';
+import Razorpay from "razorpay";
+import crypto from "crypto";
 
 // 🛑 GLOBAL ERROR HANDLERS (Absolute Top)
 process.on('uncaughtException', (err) => {
@@ -42,6 +44,11 @@ requiredEnv.forEach(key => {
 
 const openrouter = new OpenRouter({
   apiKey: process.env.OPENROUTER_API_KEY,
+});
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
 const app = express();
@@ -87,7 +94,7 @@ const apiLimiter = rateLimit({
   message: "Too many requests from this IP, please try again after 15 minutes",
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => req.user && req.user.isAdmin, // 👑 Admin Bypass
+  skip: (req) => req.user && (req.user.isAdmin || req.user.isPremium), // 👑 Admin/Premium Bypass
 });
 
 // Apply limiter to expensive AI routes
@@ -278,12 +285,66 @@ app.get("/api/profile/credits", ensureAuth, checkAndResetCredits, async (req, re
     res.json({
       isAdmin: user.isAdmin,
       generationsUsed: user.generationsUsed,
-      generationLimit: user.isAdmin ? Infinity : user.generationLimit,
+      generationLimit: (user.isAdmin || user.isPremium) ? Infinity : user.generationLimit,
       interviewsUsed: user.interviewsUsed,
-      interviewLimit: user.isAdmin ? Infinity : user.interviewLimit,
+      interviewLimit: (user.isAdmin || user.isPremium) ? Infinity : user.interviewLimit,
+      isPremium: user.isPremium,
+      premiumType: user.premiumType,
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch credits" });
+  }
+});
+
+// 💳 Razorpay Payment Routes
+app.post("/payment/create-order", ensureAuth, async (req, res) => {
+  const { plan } = req.body; // 'monthly' or 'yearly'
+  const amount = plan === "monthly" ? 19900 : 229900; // In paise (₹199 or ₹2299)
+
+  try {
+    const options = {
+      amount,
+      currency: "INR",
+      receipt: `rcpt_${req.user._id.toString().slice(-10)}_${Date.now().toString().slice(-8)}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+    res.json({
+      id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+    });
+  } catch (err) {
+    console.error("Razorpay Order Error:", err);
+    res.status(500).json({ 
+      error: "Failed to create payment order", 
+      details: err.description || err.message || JSON.stringify(err)
+    });
+  }
+});
+
+app.post("/payment/verify", ensureAuth, async (req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
+
+  const body = razorpay_order_id + "|" + razorpay_payment_id;
+  const expectedSignature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(body.toString())
+    .digest("hex");
+
+  if (expectedSignature === razorpay_signature) {
+    try {
+      await User.findByIdAndUpdate(req.user._id, {
+        isPremium: true,
+        premiumType: plan,
+      });
+      res.json({ success: true, message: "Payment verified & Premium activated!" });
+    } catch (err) {
+      console.error("Upgrade Error:", err);
+      res.status(500).json({ error: "Payment verified but failed to upgrade account" });
+    }
+  } else {
+    res.status(400).json({ success: false, message: "Invalid payment signature" });
   }
 });
 
@@ -293,10 +354,10 @@ const PORT = process.env.PORT || 5000;
 app.post("/generate-resume", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
     // 🛡️ Limit Enforcement
-    if (!req.user.isAdmin && req.user.generationsUsed >= req.user.generationLimit) {
+    if (!req.user.isAdmin && !req.user.isPremium && req.user.generationsUsed >= req.user.generationLimit) {
       return res.status(403).json({ 
         success: false, 
-        message: "Daily resume generation limit reached (5/day). Your credits will refresh tomorrow!" 
+        message: "Daily resume generation limit reached (5/day). Upgrade to unlock unlimited!" 
       });
     }
 
@@ -389,9 +450,9 @@ Return ONLY the final resume markdown text. Do not output any conversational fil
 app.get("/api/interview/start", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
     // 🛡️ Limit Enforcement
-    if (!req.user.isAdmin && req.user.interviewsUsed >= req.user.interviewLimit) {
+    if (!req.user.isAdmin && !req.user.isPremium && req.user.interviewsUsed >= req.user.interviewLimit) {
       return res.status(403).json({ 
-        error: "Daily interview limit reached (15/day). Your credits will refresh tomorrow!" 
+        error: "Daily interview limit reached (15/day). Upgrade to unlock unlimited!" 
       });
     }
 

@@ -233,7 +233,10 @@ const Build = () => {
                    <p className="text-3xl text-emerald-600 font-black mb-1">{t("premium_monthly")} <span className="text-base text-gray-500 font-medium">{t("premium_monthly_sub")}</span></p>
                    <p className="text-md text-gray-500 font-medium">{t("premium_yearly")}</p>
                  </div>
-                 <button className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1">
+                 <button 
+                   onClick={() => navigate("/profile")}
+                   className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-full font-bold text-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1"
+                 >
                    {t("premium_upgrade_btn")}
                  </button>
               </div>

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
 import axios from "axios";
 import { FaMicrophone, FaMicrophoneSlash, FaPlay, FaCheckCircle, FaArrowRight } from "react-icons/fa";
 import 'regenerator-runtime/runtime';
@@ -8,7 +10,9 @@ import { useAuth } from "../context/AuthContext";
 
 const InterviewPrep = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -133,7 +137,10 @@ const InterviewPrep = () => {
                  <p className="text-3xl text-emerald-400 font-bold mb-1">{t("premium_monthly")} <span className="text-sm text-neutral-400 font-normal">{t("premium_monthly_sub")}</span></p>
                  <p className="text-md text-neutral-400">{t("premium_yearly")}</p>
                </div>
-               <button className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 px-8 py-3 text-white rounded-full font-bold text-lg shadow-lg hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-1">
+               <button 
+                 onClick={() => navigate("/profile")}
+                 className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 px-8 py-3 text-white rounded-full font-bold text-lg shadow-lg hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-1"
+               >
                  {t("premium_upgrade_btn")}
                </button>
            </div>

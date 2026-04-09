@@ -138,6 +138,60 @@ const Profile = () => {
       setMessages(messages.filter(m => m._id !== msgId));
     } catch (err) { console.error(err); }
   };
+
+  const handleUpgrade = async (plan) => {
+    try {
+      // 1. Create order on server
+      const { data: order } = await axios.post('/payment/create-order', { plan });
+
+
+      // 2. Open Razorpay Checkout
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: order.amount,
+        currency: order.currency,
+        name: "ResumeBuild Premium",
+        description: `${plan.charAt(0).toUpperCase() + plan.slice(1)} Subscription`,
+        order_id: order.id,
+        handler: async (response) => {
+          try {
+            // 3. Verify payment on server
+            const { data: verifyData } = await axios.post('/payment/verify', {
+              ...response,
+              plan
+            });
+
+
+            if (verifyData.success) {
+              alert("Congratulations! You are now a Premium user.");
+              await checkAuth(); // Refresh user data
+              const { data: creditData } = await axios.get('/api/profile/credits');
+              setCredits(creditData);
+            }
+          } catch (err) {
+            console.error("Verification error:", err);
+            alert("Payment verification failed. Please contact support.");
+          }
+        },
+        prefill: {
+          name: user.displayName,
+          email: user.email,
+        },
+        theme: {
+          color: "#10b981", // Emerald-500
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error("Order creation error:", err);
+      const errorMsg = err.response?.data?.error || err.message || "Failed to initiate payment";
+      const details = err.response?.data?.details ? ` (${err.response.data.details})` : "";
+      alert(`${errorMsg}${details}. Please try again.`);
+    }
+  };
+
   
   const handleViewResume = (resume) => {
     setSelectedResume(resume);
@@ -277,22 +331,34 @@ const Profile = () => {
                   ))}
                 </div>
 
-                {!user?.isAdmin && (
+                {!user?.isAdmin && !user?.isPremium && (
                   <div className="mt-4 bg-gradient-to-r from-emerald-900/40 to-emerald-800/10 border border-emerald-500/40 rounded-xl p-5 flex flex-col sm:flex-row items-center justify-between gap-5 transition-all hover:border-emerald-500/70 shadow-lg shadow-emerald-900/20">
                     <div className="text-center sm:text-left">
                       <h4 className="text-emerald-400 font-bold text-lg mb-1">{t("premium_title")}</h4>
                       <p className="text-neutral-400 text-sm max-w-sm">{t("premium_profile_desc")}</p>
                     </div>
                     <div className="flex flex-col items-center sm:items-end gap-2 shrink-0">
-                      <button className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold px-8 py-2.5 rounded-full shadow-lg hover:shadow-emerald-500/30 transition-all transform hover:-translate-y-0.5 whitespace-nowrap">
-                        {t("premium_upgrade_btn")}
-                      </button>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleUpgrade('monthly')}
+                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-full text-sm shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
+                        >
+                          {t("premium_upgrade_btn")} (Monthly)
+                        </button>
+                        <button 
+                          onClick={() => handleUpgrade('yearly')}
+                          className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold px-4 py-2 rounded-full text-sm shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap"
+                        >
+                          {t("premium_upgrade_btn")} (Yearly)
+                        </button>
+                      </div>
                       <span className="text-xs text-emerald-400/80 font-medium tracking-wide">
-                        {t("premium_monthly")} {t("premium_monthly_sub")} {t("premium_yearly").replace("or ", "• ")}
+                        {t("premium_monthly")} {t("premium_monthly_sub")} • {t("premium_yearly").replace("or ", "")}
                       </span>
                     </div>
                   </div>
                 )}
+
               </div>
             </motion.div>
           )}

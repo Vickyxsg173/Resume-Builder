@@ -57,6 +57,15 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isPremium: {
+    type: Boolean,
+    default: false,
+  },
+  premiumType: {
+    type: String,
+    enum: ['monthly', 'yearly', 'none'],
+    default: 'none',
+  },
   createdAt: {
     type: Date,
     default: Date.now,

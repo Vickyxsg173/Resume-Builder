@@ -9,6 +9,7 @@ export default defineConfig({
       '/api': 'http://localhost:5000',
       '/auth': 'http://localhost:5000',
       '/generate-resume': 'http://localhost:5000',
+      '/payment': 'http://localhost:5000',
     }
   },
   build: {
