@@ -106,6 +106,7 @@ i18n
           news_error_fetch: "Failed to fetch news",
           news_error_server: "Server error",
           news_by_author: "by",
+          show_more_news: "Show More",
 
           // About Page
           about_hero_heading_1: "WE ARE",
@@ -272,6 +273,7 @@ i18n
           news_error_fetch: "समाचार प्राप्त करने में विफल",
           news_error_server: "सर्वर त्रुटि",
           news_by_author: "द्वारा",
+          show_more_news: "और दिखाएं",
 
           // About Page
           about_hero_heading_1: "हम हैं",

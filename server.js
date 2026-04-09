@@ -8,6 +8,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import User from "./models/User.js";
+import Message from "./models/Message.js";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import path from "path";
@@ -195,6 +196,40 @@ const ensureAuth = (req, res, next) => {
   res.status(401).json({ error: "Unauthorized" });
 };
 
+// 🔄 Daily Credits Reset Middleware
+const checkAndResetCredits = async (req, res, next) => {
+  if (!req.user || req.user.isAdmin) return next();
+
+  const now = new Date();
+  const lastReset = new Date(req.user.lastCreditReset || 0);
+
+  // Check if it's a new calendar day (UTC)
+  const isNewDay = 
+    now.getUTCDate() !== lastReset.getUTCDate() || 
+    now.getUTCMonth() !== lastReset.getUTCMonth() || 
+    now.getUTCFullYear() !== lastReset.getUTCFullYear();
+
+  if (isNewDay) {
+    try {
+      req.user.generationsUsed = 0;
+      req.user.interviewsUsed = 0;
+      req.user.lastCreditReset = now;
+      await req.user.save();
+    } catch (err) {
+      console.error("Credit reset error:", err);
+    }
+  }
+  next();
+};
+
+// 👑 Admin Authentication Middleware
+const ensureAdmin = (req, res, next) => {
+  if (req.isAuthenticated() && req.user.isAdmin) {
+    return next();
+  }
+  res.status(403).json({ error: "Access denied. Admin privileges required." });
+};
+
 // 👤 Profile Routes
 app.get("/api/profile", ensureAuth, (req, res) => {
   res.json(req.user);
@@ -237,7 +272,7 @@ app.delete("/api/profile/resumes/:resumeId", ensureAuth, async (req, res) => {
 });
 
 // 💳 Get Credits Info
-app.get("/api/profile/credits", ensureAuth, async (req, res) => {
+app.get("/api/profile/credits", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
     res.json({
@@ -254,9 +289,17 @@ app.get("/api/profile/credits", ensureAuth, async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// 🔥 MAIN ROUTE
-app.post("/generate-resume", async (req, res) => {
+// 🔥 MAIN ROUTE — Auth required: history tracking + prevents API abuse
+app.post("/generate-resume", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
+    // 🛡️ Limit Enforcement
+    if (!req.user.isAdmin && req.user.generationsUsed >= req.user.generationLimit) {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Daily resume generation limit reached (5/day). Your credits will refresh tomorrow!" 
+      });
+    }
+
     const userData = req.body;
 
     // 🧠 Prompt Engineering
@@ -326,15 +369,13 @@ Return ONLY the final resume markdown text. Do not output any conversational fil
       }
     }
 
+    // 📊 Track usage & Return response
+    await User.findByIdAndUpdate(req.user._id, { $inc: { generationsUsed: 1 } });
+
     res.json({
       success: true,
       resume: aiResume,
     });
-
-    // 📊 Track usage (non-blocking, only for logged-in users)
-    if (req.user) {
-      User.findByIdAndUpdate(req.user._id, { $inc: { generationsUsed: 1 } }).catch(() => {});
-    }
 
   } catch (error) {
     console.error("Error:", error);
@@ -345,8 +386,18 @@ Return ONLY the final resume markdown text. Do not output any conversational fil
   }
 });
 
-app.get("/api/interview/start", async (req, res) => {
+app.get("/api/interview/start", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
+    // 🛡️ Limit Enforcement
+    if (!req.user.isAdmin && req.user.interviewsUsed >= req.user.interviewLimit) {
+      return res.status(403).json({ 
+        error: "Daily interview limit reached (15/day). Your credits will refresh tomorrow!" 
+      });
+    }
+
+    // 📊 Track usage
+    await User.findByIdAndUpdate(req.user._id, { $inc: { interviewsUsed: 1 } });
+
     const completion = await openrouter.chat.send({
       chatGenerationParams: {
         model: "openai/gpt-4o-mini",
@@ -369,7 +420,7 @@ app.get("/api/interview/start", async (req, res) => {
   }
 });
 
-app.post("/api/interview/answer", async (req, res) => {
+app.post("/api/interview/answer", ensureAuth, async (req, res) => {
   const { question, answer } = req.body;
 
   try {
@@ -421,22 +472,18 @@ app.get("/api/hn-news", async (req, res) => {
     // Step 2: Take first 5
     const topIds = ids.slice(0, 50);
 
-    let news = [];
+    // Step 3: Fetch all stories in parallel (Faster & more stable)
+    const storyPromises = topIds.map(id => 
+      axios.get(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
+    );
 
-    // Step 3: Fetch each story (simple loop)
-    for (let i = 0; i < topIds.length; i++) {
-      const story = await axios.get(
-        `https://hacker-news.firebaseio.com/v0/item/${topIds[i]}.json`
-      );
+    const responses = await Promise.all(storyPromises);
 
-      news.push({
-        title: story.data.title,
-        url:
-          story.data.url ||
-          `https://news.ycombinator.com/item?id=${topIds[i]}`,
-        author: story.data.by,
-      });
-    }
+    const news = responses.map((res, index) => ({
+      title: res.data.title,
+      url: res.data.url || `https://news.ycombinator.com/item?id=${topIds[index]}`,
+      author: res.data.by,
+    }));
 
     // Step 4: Send to frontend
     res.json({
@@ -450,7 +497,7 @@ app.get("/api/hn-news", async (req, res) => {
   }
 });
 
-app.post("/api/chat", async (req, res) => {
+app.post("/api/chat", ensureAuth, async (req, res) => {
   const { messages } = req.body;
 
   try {
@@ -504,6 +551,40 @@ Your goal is to make the user successfully use THIS website, not anything else.`
   } catch (error) {
     console.error(error.response?.data || error.message);
     res.status(500).json({ error: "Something went wrong" });
+  }
+});
+
+// 📬 Public Contact Route
+app.post("/api/contact", async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    const newMessage = await Message.create({ name, email, message });
+    res.status(201).json({ success: true, message: "Sent successfully" });
+  } catch (err) {
+    console.error("Contact submission error:", err);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+});
+
+// 🛡️ Admin Message Management
+app.get("/api/admin/messages", ensureAdmin, async (req, res) => {
+  try {
+    const messages = await Message.find().sort({ createdAt: -1 });
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch messages" });
+  }
+});
+
+app.delete("/api/admin/messages/:id", ensureAdmin, async (req, res) => {
+  try {
+    await Message.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete message" });
   }
 });
 

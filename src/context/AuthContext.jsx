@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import API_BASE_URL from "../config";
 
 const AuthContext = createContext();
 
@@ -35,7 +36,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = () => {
-    window.location.href = "/auth/google";
+    window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
   const logout = async () => {

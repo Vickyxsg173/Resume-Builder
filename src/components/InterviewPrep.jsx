@@ -4,9 +4,11 @@ import { FaMicrophone, FaMicrophoneSlash, FaPlay, FaCheckCircle, FaArrowRight } 
 import 'regenerator-runtime/runtime';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import { useTranslation } from "react-i18next";
+import { useAuth } from "../context/AuthContext";
 
 const InterviewPrep = () => {
   const { t } = useTranslation();
+  const { isAuthenticated } = useAuth();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");

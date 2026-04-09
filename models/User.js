@@ -39,7 +39,7 @@ const userSchema = new mongoose.Schema({
   },
   generationLimit: {
     type: Number,
-    default: 10, // Free tier: 10 resume generations
+    default: 5, // Free tier: 5 resume generations per day
   },
   interviewsUsed: {
     type: Number,
@@ -47,7 +47,11 @@ const userSchema = new mongoose.Schema({
   },
   interviewLimit: {
     type: Number,
-    default: 20, // Free tier: 20 interview sessions
+    default: 15, // Free tier: 15 interview sessions per day
+  },
+  lastCreditReset: {
+    type: Date,
+    default: Date.now,
   },
   isAdmin: {
     type: Boolean,

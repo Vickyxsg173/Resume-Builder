@@ -6,7 +6,7 @@ import axios from 'axios';
 import {
   FaUserEdit, FaSave, FaTrash, FaBriefcase,
   FaFileAlt, FaCrown, FaSignInAlt, FaChartBar,
-  FaCalendarAlt, FaCheckCircle
+  FaCalendarAlt, FaCheckCircle, FaInbox
 } from 'react-icons/fa';
 
 const StatCard = ({ icon, label, value, max, color, remainingText }) => {
@@ -56,14 +56,27 @@ const Profile = () => {
   const [newSkill, setNewSkill] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [credits, setCredits] = useState(null);
+  const [messages, setMessages] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const [loadingMessages, setLoadingMessages] = useState(false);
+
+  const fetchMessages = async () => {
+    if (!user?.isAdmin) return;
+    setLoadingMessages(true);
+    try {
+      const { data } = await axios.get('/api/admin/messages');
+      setMessages(data);
+    } catch (err) { console.error(err); }
+    setLoadingMessages(false);
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
       axios.get('/api/profile/credits').then(r => setCredits(r.data)).catch(() => {});
+      if (user?.isAdmin) fetchMessages();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user?.isAdmin]);
 
   if (loading) return (
     <div className="h-screen flex items-center justify-center bg-neutral-950">
@@ -113,19 +126,18 @@ const Profile = () => {
     } catch (err) { console.error(err); }
   };
 
-  const handleDeleteResume = async (resumeId) => {
-    setDeletingId(resumeId);
+  const handleDeleteMessage = async (msgId) => {
     try {
-      await axios.delete(`/api/profile/resumes/${resumeId}`);
-      await checkAuth(); // Refresh user data
+      await axios.delete(`/api/admin/messages/${msgId}`);
+      setMessages(messages.filter(m => m._id !== msgId));
     } catch (err) { console.error(err); }
-    setDeletingId(null);
   };
 
   const tabs = [
     { id: 'overview', label: t("profile_tab_overview"), icon: <FaChartBar /> },
     { id: 'resumes', label: `${t("profile_tab_resumes")} (${user?.savedResumes?.length || 0})`, icon: <FaFileAlt /> },
     { id: 'skills', label: t("profile_tab_skills"), icon: <FaBriefcase /> },
+    ...(user?.isAdmin ? [{ id: 'inbox', label: `Inbox (${messages.length})`, icon: <FaInbox /> }] : [])
   ];
 
   return (
@@ -228,6 +240,63 @@ const Profile = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── Inbox Tab (Admin Only) ── */}
+          {activeTab === 'inbox' && user?.isAdmin && (
+            <motion.div key="inbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold flex items-center gap-2 text-orange-400">
+                    <FaInbox /> Admin Inbox
+                  </h2>
+                  <button 
+                    onClick={fetchMessages}
+                    className="text-xs bg-neutral-800 hover:bg-neutral-700 px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    Refresh
+                  </button>
+                </div>
+
+                {loadingMessages ? (
+                  <div className="py-12 flex justify-center">
+                    <div className="w-8 h-8 border-2 border-orange-500/30 border-t-orange-500 rounded-full animate-spin" />
+                  </div>
+                ) : messages.length > 0 ? (
+                  <div className="space-y-4">
+                    {messages.map((msg) => (
+                      <div key={msg._id} className="bg-neutral-800/40 border border-neutral-700/50 rounded-2xl p-5 hover:border-orange-500/30 transition-all group">
+                        <div className="flex justify-between items-start mb-3">
+                          <div>
+                            <h3 className="font-bold text-white text-lg">{msg.name}</h3>
+                            <p className="text-sm text-orange-400 font-medium">{msg.email}</p>
+                          </div>
+                          <div className="flex flex-col items-end gap-2">
+                             <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">
+                              {new Date(msg.createdAt).toLocaleString()}
+                            </span>
+                            <button 
+                              onClick={() => handleDeleteMessage(msg._id)}
+                              className="p-2 text-neutral-600 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                            >
+                              <FaTrash size={14} />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="bg-neutral-900/50 rounded-xl p-4 text-neutral-300 text-sm leading-relaxed border border-neutral-700/30">
+                          {msg.message}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-20 text-center">
+                    <FaInbox size={48} className="mx-auto mb-4 opacity-10 text-orange-500" />
+                    <p className="text-neutral-500">No messages yet. They'll appear here when users contact you.</p>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

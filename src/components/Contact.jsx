@@ -25,16 +25,32 @@ const containerVariant = {
 
 const Contact = () => {
   const { t } = useTranslation();
+  const [formData, setFormData] = useState({ name: "", email: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        setSent(true);
+        setFormData({ name: "", email: "", message: "" });
+        setTimeout(() => setSent(false), 5000);
+      }
+    } catch (err) {
+      console.error(err);
+    }
     setLoading(false);
-    setSent(true);
-    setTimeout(() => setSent(false), 3000);
   };
 
   return (
@@ -98,7 +114,9 @@ const Contact = () => {
               <motion.div className="space-y-2" variants={fieldVariant}>
                 <label className="text-xs uppercase tracking-widest font-bold text-orange-500/70 ml-1">{t('your_name')}</label>
                 <input
-                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
                   required
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-orange-500/50 focus:bg-white/10 transition-all text-white placeholder-white/20"
                   placeholder={t('name_placeholder')}
@@ -107,7 +125,9 @@ const Contact = () => {
               <motion.div className="space-y-2" variants={fieldVariant}>
                 <label className="text-xs uppercase tracking-widest font-bold text-orange-500/70 ml-1">{t('email_address')}</label>
                 <input
-                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
                   required
                   className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-orange-500/50 focus:bg-white/10 transition-all text-white placeholder-white/20"
                   placeholder={t('email_placeholder')}
@@ -118,6 +138,9 @@ const Contact = () => {
             <motion.div className="space-y-2" variants={fieldVariant}>
               <label className="text-xs uppercase tracking-widest font-bold text-orange-500/70 ml-1">{t('message_label')}</label>
               <textarea
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 rows={4}
                 required
                 className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 outline-none focus:border-orange-500/50 focus:bg-white/10 transition-all text-white placeholder-white/20 resize-none"

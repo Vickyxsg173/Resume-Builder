@@ -6,12 +6,12 @@ import { FaBars, FaTimes } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import i18n from "i18next";
 import { useAuth } from "../context/AuthContext";
-
 const Navbar = ({ addtoref }) => {
   const { t } = useTranslation();
   const { user, isAuthenticated, login, logout } = useAuth();
   const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
+
 
   const toggleMenu = () => setMenuOpen((prev) => !prev);
   const closeMenu = () => setMenuOpen(false);
@@ -26,15 +26,15 @@ const Navbar = ({ addtoref }) => {
 
       {/* Desktop Nav Links */}
       <div className="hidden lg:flex flex-row gap-[2vw] items-center">
-        <Link className="hover:text-orange-500 transition-colors" to="/" onClick={closeMenu}>{t("home")}</Link>
-        <Link className="hover:text-orange-500 transition-colors" to="/Build" onClick={closeMenu}>{t("build")}</Link>
-        <Link className="hover:text-orange-500 transition-colors" to="/InterviewPrep" onClick={closeMenu}>{t("interview")}</Link>
-        <Link className="hover:text-orange-500 transition-colors" to="/News" onClick={closeMenu}>{t("news")}</Link>
-        <Link className="hover:text-orange-500 transition-colors" to="/About" onClick={closeMenu}>{t("about")}</Link>
-        <Link className="hover:text-orange-500 transition-colors" to="/Contact" onClick={closeMenu}>{t("contact")}</Link>
+        <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/" onClick={closeMenu}>{t("home")}</Link>
+        <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/Build" onClick={closeMenu}>{t("build")}</Link>
+        <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/InterviewPrep" onClick={closeMenu}>{t("interview")}</Link>
+        <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/News" onClick={closeMenu}>{t("news")}</Link>
+        <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/About" onClick={closeMenu}>{t("about")}</Link>
+        <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/Contact" onClick={closeMenu}>{t("contact")}</Link>
 
         {isAuthenticated && (
-          <Link className="hover:text-orange-500 transition-colors" to="/Profile" onClick={closeMenu}>{t("profile")}</Link>
+          <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/Profile" onClick={closeMenu}>{t("profile")}</Link>
         )}
 
         {/* Language Switcher */}
@@ -79,6 +79,7 @@ const Navbar = ({ addtoref }) => {
           </button>
         )}
       </div>
+
 
       {/* Mobile: Right side (auth avatar + hamburger) */}
       <div className="flex lg:hidden items-center gap-3">
