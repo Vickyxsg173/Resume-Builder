@@ -64,11 +64,12 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https://lh3.googleusercontent.com", "https://www.gstatic.com", "https://cdn.razorpay.com"],
-      connectSrc: ["'self'", "https://openrouter.ai", "https://hacker-news.firebaseio.com", "https://api.razorpay.com", "https://lumberjack.razorpay.com", "https://lumberjack-cx.razorpay.com"],
-      frameSrc: ["'self'", "https://api.razorpay.com"],
+      imgSrc: ["'self'", "data:", "https://lh3.googleusercontent.com", "https://www.gstatic.com", "https://*.razorpay.com"],
+      connectSrc: ["'self'", "https://openrouter.ai", "https://hacker-news.firebaseio.com", "https://api.razorpay.com", "https://*.razorpay.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com", "https://*.razorpay.com"],
     },
   },
+
   crossOriginEmbedderPolicy: false,
 }));
 app.set('trust proxy', 1);
@@ -331,6 +332,9 @@ app.post("/payment/create-order", ensureAuth, async (req, res) => {
 });
 
 app.post("/payment/verify", ensureAuth, async (req, res) => {
+  if (!razorpay) {
+    return res.status(503).json({ error: "Payment gateway is not configured" });
+  }
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan } = req.body;
 
   const body = razorpay_order_id + "|" + razorpay_payment_id;
@@ -351,7 +355,15 @@ app.post("/payment/verify", ensureAuth, async (req, res) => {
       res.status(500).json({ error: "Payment verified but failed to upgrade account" });
     }
   } else {
-    res.status(400).json({ success: false, message: "Invalid payment signature" });
+    console.error("Signature Mismatch!");
+    console.error("Received Body:", body);
+    console.error("Expected Signature:", expectedSignature);
+    console.error("Received Signature:", razorpay_signature);
+    res.status(400).json({ 
+      success: false, 
+      message: "Invalid payment signature",
+      debug: { body, expected: expectedSignature, received: razorpay_signature }
+    });
   }
 });
 

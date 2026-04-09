@@ -170,7 +170,9 @@ const Profile = () => {
             }
           } catch (err) {
             console.error("Verification error:", err);
-            alert("Payment verification failed. Please contact support.");
+            const msg = err.response?.data?.message || err.message || "Payment verification failed";
+            const debug = err.response?.data?.debug ? ` (Debug: ${JSON.stringify(err.response.data.debug)})` : "";
+            alert(`${msg}${debug}. Please contact support.`);
           }
         },
         prefill: {
