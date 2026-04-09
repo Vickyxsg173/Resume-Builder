@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import html2pdf from "html2pdf.js";
 import { useAuth } from "../context/AuthContext";
@@ -6,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { FaSave, FaDownload } from "react-icons/fa";
 
 const Build = () => {
+  const location = useLocation();
   const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
@@ -31,6 +33,26 @@ const Build = () => {
       }));
     }
   }, [isAuthenticated, user]);
+
+  // 📂 Handle loading saved resume from profile
+  useEffect(() => {
+    if (location.state?.resumeData) {
+      const { title, content } = location.state.resumeData;
+      setResume(content);
+      setFormData(prev => ({
+        ...prev,
+        name: title.split(' - ')[0] // Extract name from title if it follows "Name - Date" pattern
+      }));
+      
+      // Smooth scroll to resume output
+      setTimeout(() => {
+        const output = document.getElementById("resume-output");
+        if (output) {
+          output.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+  }, [location.state]);
 
   // Handle input change
   const handleChange = (e) => {
@@ -64,8 +86,14 @@ const Build = () => {
         setResume(data.resume);
         // 🔖 Auto-save to profile if logged in
         if (isAuthenticated && saveResume) {
-          saveResume(formData.name || 'Resume', data.resume).catch(() => {});
+          const versionNumber = (user?.savedResumes?.length || 0) + 1;
+          const title = `${formData.name || 'Resume'} - Version ${versionNumber}`;
+          saveResume(title, data.resume).catch(() => {});
         }
+        // 📜 Auto-scroll to resume
+        setTimeout(() => {
+          document.getElementById("resume-output")?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
       } else {
         setResume(t("build_error_invalid"));
       }
@@ -175,15 +203,6 @@ const Build = () => {
       {resume && (
         <div className="mt-12 flex flex-col items-center pb-20 w-full overflow-x-auto">
           <div className="w-full max-w-[21cm] flex justify-end gap-3 mb-4 min-w-[320px] px-2">
-            {isAuthenticated && (
-              <button
-                onClick={handleSaveToProfile}
-                disabled={savingToProfile}
-                className="px-5 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold rounded-md shadow-md transition cursor-pointer flex items-center gap-2 disabled:opacity-50"
-              >
-                <FaSave /> {savingToProfile ? t("build_saving") : t("build_save_profile")}
-              </button>
-            )}
             <button
               onClick={downloadPDF}
               className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-md transition cursor-pointer flex items-center gap-2"

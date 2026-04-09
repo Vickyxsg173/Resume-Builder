@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import html2pdf from 'html2pdf.js';
 import {
   FaUserEdit, FaSave, FaTrash, FaBriefcase,
   FaFileAlt, FaCrown, FaSignInAlt, FaChartBar,
-  FaCalendarAlt, FaCheckCircle, FaInbox
+  FaCalendarAlt, FaCheckCircle, FaInbox,
+  FaTimes, FaDownload
 } from 'react-icons/fa';
 
 const StatCard = ({ icon, label, value, max, color, remainingText }) => {
@@ -51,6 +55,7 @@ const StatCard = ({ icon, label, value, max, color, remainingText }) => {
 };
 
 const Profile = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { user, isAuthenticated, loading, updateSkills, checkAuth } = useAuth();
   const [newSkill, setNewSkill] = useState('');
@@ -60,6 +65,7 @@ const Profile = () => {
   const [deletingId, setDeletingId] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [selectedResume, setSelectedResume] = useState(null);
 
   const fetchMessages = async () => {
     if (!user?.isAdmin) return;
@@ -131,6 +137,36 @@ const Profile = () => {
       await axios.delete(`/api/admin/messages/${msgId}`);
       setMessages(messages.filter(m => m._id !== msgId));
     } catch (err) { console.error(err); }
+  };
+  
+  const handleViewResume = (resume) => {
+    setSelectedResume(resume);
+  };
+
+  const downloadPDFFromModal = () => {
+    if (!selectedResume) return;
+    const element = document.getElementById("resume-content-modal");
+    const opt = {
+      margin:       0.5,
+      filename:     `${selectedResume.title.replace(/\s+/g, '_')}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+  };
+
+  const handleDeleteResume = async (resumeId) => {
+    setDeletingId(resumeId);
+    try {
+      await axios.delete(`/api/profile/resumes/${resumeId}`);
+      await checkAuth(); // Refresh user data to update the list
+    } catch (err) {
+      console.error(err);
+      alert(t("profile_delete_fail") || "Failed to delete resume");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const tabs = [
@@ -316,23 +352,37 @@ const Profile = () => {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="flex items-center justify-between p-4 bg-neutral-800/50 border border-neutral-700 rounded-xl hover:border-blue-500/40 transition-all group"
+                        onClick={() => handleViewResume(resume)}
+                        className="flex items-center justify-between p-4 bg-neutral-800/50 border border-neutral-700 rounded-xl hover:border-blue-500/40 transition-all group cursor-pointer"
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-blue-500/15 rounded-lg flex items-center justify-center text-blue-400">
                             <FaFileAlt />
                           </div>
                           <div>
-                            <h3 className="font-semibold">{resume.title || t("profile_untitled")}</h3>
-                            <p className="text-xs text-neutral-500">
-                              {new Date(resume.createdAt).toLocaleDateString('en-US', {
-                                day: 'numeric', month: 'short', year: 'numeric'
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold group-hover:text-blue-400 transition-colors">
+                                {resume.title.split(' - Version ')[0] || t("profile_untitled")}
+                              </h3>
+                              {resume.title.includes(' - Version ') && (
+                                <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded font-semibold tracking-wider">
+                                  v{resume.title.split(' - Version ')[1]}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-neutral-500 mt-0.5 uppercase tracking-wider font-medium">
+                              {new Date(resume.createdAt).toLocaleString('en-US', {
+                                day: 'numeric', month: 'short', year: 'numeric',
+                                hour: 'numeric', minute: '2-digit', hour12: true
                               })}
                             </p>
                           </div>
                         </div>
                         <button
-                          onClick={() => handleDeleteResume(resume._id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteResume(resume._id);
+                          }}
                           disabled={deletingId === resume._id}
                           className="p-2 text-neutral-600 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                         >
@@ -406,6 +456,93 @@ const Profile = () => {
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* ── Resume View Modal ── */}
+      <AnimatePresence>
+        {selectedResume && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
+          >
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedResume(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+
+            {/* Modal Container */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-4xl max-h-[90vh] bg-neutral-900 border border-neutral-700/50 rounded-3xl shadow-2xl flex flex-col overflow-hidden"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-5 border-b border-neutral-800 bg-neutral-900/50 backdrop-blur">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center text-orange-500">
+                    <FaFileAlt />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-bold text-white">{selectedResume.title.split(' - Version ')[0]}</h2>
+                      {selectedResume.title.includes(' - Version ') && (
+                        <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-semibold tracking-wider border border-blue-500/30">
+                          v{selectedResume.title.split(' - Version ')[1]}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-1">
+                      {new Date(selectedResume.createdAt).toLocaleString(undefined, {
+                        dateStyle: 'long', timeStyle: 'short'
+                      })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={downloadPDFFromModal}
+                    className="p-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 hover:text-white rounded-xl transition-all flex items-center gap-2 text-sm font-semibold"
+                    title="Download PDF"
+                  >
+                    <FaDownload /> <span className="hidden sm:inline">Download</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedResume(null)}
+                    className="p-2.5 bg-neutral-800 hover:bg-red-500/20 text-neutral-300 hover:text-red-500 rounded-xl transition-all"
+                  >
+                    <FaTimes size={18} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto p-6 md:p-10 bg-neutral-950/30">
+                <div id="resume-content-modal" className="bg-white text-black p-8 md:p-12 shadow-inner rounded-sm mx-auto max-w-[21cm] min-h-[29.7cm]">
+                  <ReactMarkdown
+                    components={{
+                      h1: ({ children }) => <h1 className="text-3xl font-bold text-center mb-4 uppercase tracking-wider border-b-2 border-black pb-2">{children}</h1>,
+                      h2: ({ children }) => <h2 className="text-xl font-bold mt-6 mb-2 border-b border-gray-400 pb-1 uppercase">{children}</h2>,
+                      h3: ({ children }) => <h3 className="text-lg font-semibold mt-4 mb-1">{children}</h3>,
+                      p: ({ children }) => <p className="mb-2 leading-relaxed text-[15px] text-gray-800 break-words whitespace-pre-wrap">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc pl-5 mb-3">{children}</ul>,
+                      li: ({ children }) => <li className="mb-1 text-[15px] text-gray-800 leading-relaxed">{children}</li>,
+                      strong: ({ children }) => <strong className="font-bold text-black">{children}</strong>
+                    }}
+                  >
+                    {selectedResume.content}
+                  </ReactMarkdown>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
