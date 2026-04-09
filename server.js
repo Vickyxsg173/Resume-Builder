@@ -61,11 +61,12 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://checkout.razorpay.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https://lh3.googleusercontent.com", "https://www.gstatic.com"],
-      connectSrc: ["'self'", "https://openrouter.ai", "https://hacker-news.firebaseio.com"],
+      imgSrc: ["'self'", "data:", "https://lh3.googleusercontent.com", "https://www.gstatic.com", "https://cdn.razorpay.com"],
+      connectSrc: ["'self'", "https://openrouter.ai", "https://hacker-news.firebaseio.com", "https://api.razorpay.com", "https://lumberjack.razorpay.com", "https://lumberjack-cx.razorpay.com"],
+      frameSrc: ["'self'", "https://api.razorpay.com"],
     },
   },
   crossOriginEmbedderPolicy: false,
