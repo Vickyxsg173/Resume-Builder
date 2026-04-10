@@ -507,7 +507,7 @@ const Profile = () => {
                   referrerPolicy="no-referrer"
                 />
                 
-                {/* Overlay */}
+                {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
                   <FaCamera size={20} className="text-white" />
                 </div>
@@ -520,6 +520,15 @@ const Profile = () => {
                 )}
               </div>
 
+              {/* Permanent Camera Badge */}
+              <button 
+                onClick={handleImageClick}
+                className="absolute bottom-0 right-0 bg-orange-500 text-white p-2 rounded-full shadow-lg border-2 border-neutral-950 hover:bg-orange-600 transition-colors z-10"
+                title="Change Profile Picture"
+              >
+                <FaCamera size={12} />
+              </button>
+
               {/* Hidden File Input */}
               <input 
                 type="file" 
@@ -530,8 +539,8 @@ const Profile = () => {
               />
 
               {user.isAdmin && (
-                <span className="absolute -bottom-1 -right-1 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <FaCrown size={10} /> Admin
+                <span className="absolute -top-1 -right-1 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg z-10">
+                  <FaCrown size={8} /> Admin
                 </span>
               )}
             </div>
