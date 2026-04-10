@@ -262,13 +262,17 @@ const Profile = () => {
     setIsUploadingImage(true);
     try {
       const fileExt = file.name.split('.').pop();
+      // Simplify path: just the filename, not avatars/avatars/
       const fileName = `${user._id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const filePath = fileName; 
 
       // 1. Upload to Supabase
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true // Allow overwriting if same ID
+        });
 
       if (uploadError) throw uploadError;
 
@@ -280,9 +284,11 @@ const Profile = () => {
       // 3. Save to MongoDB
       await updateProfileImage(publicUrl);
       
+      alert("Profile photo updated successfully!");
     } catch (err) {
       console.error("Upload error:", err);
-      alert("Failed to upload image. Please ensure your Supabase storage bucket 'avatars' is public.");
+      // Show actual Supabase error for debugging
+      alert(`Upload failed: ${err.message || "Unknown error"}. Check if bucket 'avatars' exists and has 'INSERT' policies.`);
     } finally {
       setIsUploadingImage(false);
     }
