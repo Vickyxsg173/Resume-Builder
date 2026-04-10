@@ -10,7 +10,8 @@ import {
   FaUserEdit, FaSave, FaTrash, FaBriefcase,
   FaFileAlt, FaCrown, FaSignInAlt, FaChartBar,
   FaCalendarAlt, FaCheckCircle, FaInbox,
-  FaTimes, FaDownload, FaSearch, FaUserCog
+  FaTimes, FaDownload, FaSearch, FaUserCog,
+  FaExclamationTriangle, FaUserSlash
 } from 'react-icons/fa';
 
 const TIER_LIMITS = {
@@ -212,6 +213,8 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [selectedResume, setSelectedResume] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   const fetchMessages = async () => {
     if (!user?.isAdmin) return;
@@ -290,7 +293,6 @@ const Profile = () => {
       // 1. Create order on server
       const { data: order } = await axios.post('/payment/create-order', { plan });
 
-
       // 2. Open Razorpay Checkout
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
@@ -306,7 +308,6 @@ const Profile = () => {
               ...response,
               plan
             });
-
 
             if (verifyData.success) {
               alert("Congratulations! You are now a Premium user.");
@@ -334,9 +335,31 @@ const Profile = () => {
       rzp.open();
     } catch (err) {
       console.error("Order creation error:", err);
+      
+      // 🛡️ Improve 401 handling
+      if (err.response?.status === 401) {
+        alert("Your session has expired. Please log out and log back in to continue.");
+        return;
+      }
+
       const errorMsg = err.response?.data?.error || err.message || "Failed to initiate payment";
       const details = err.response?.data?.details ? ` (${err.response.data.details})` : "";
       alert(`${errorMsg}${details}. Please try again.`);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setIsDeletingAccount(true);
+    try {
+      await axios.delete('/api/profile');
+      // Redirect to home page after successful deletion
+      window.location.href = '/';
+    } catch (err) {
+      console.error("Account deletion failed:", err);
+      alert("Failed to delete account. Please try again.");
+    } finally {
+      setIsDeletingAccount(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -548,6 +571,27 @@ const Profile = () => {
                   </div>
                 )}
 
+                {/* ── Danger Zone ── */}
+                {!user?.isAdmin && (
+                  <div className="mt-8 pt-8 border-t border-red-900/20">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-red-900/5 border border-red-900/20 rounded-2xl p-6">
+                      <div className="text-center sm:text-left">
+                        <h4 className="text-red-400 font-bold text-lg mb-1 flex items-center justify-center sm:justify-start gap-2">
+                          <FaExclamationTriangle className="text-red-500" /> Danger Zone
+                        </h4>
+                        <p className="text-neutral-500 text-sm max-w-sm">
+                          Permanently delete your account and all your saved resumes. This action is irreversible.
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/30 px-6 py-3 rounded-full text-sm font-bold transition-all flex items-center gap-2 group shadow-lg shadow-red-900/10"
+                      >
+                        <FaUserSlash className="group-hover:scale-110 transition-transform" /> Delete Account
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -892,6 +936,58 @@ const Profile = () => {
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Account Deletion Confirmation Modal ── */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeleteConfirm(false)}
+              className="absolute inset-0 bg-neutral-950/90 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-neutral-900 border border-red-900/30 rounded-3xl p-8 max-w-md w-full shadow-2xl overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-1 bg-red-500" />
+              <div className="w-16 h-16 bg-red-500/10 text-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 text-2xl">
+                <FaExclamationTriangle />
+              </div>
+              <h3 className="text-2xl font-black text-white text-center mb-3">Are you absolutely sure?</h3>
+              <p className="text-neutral-400 text-center mb-8 leading-relaxed">
+                This will permanently delete your profile, saved resumes, and all usage history. <strong>This action cannot be undone.</strong>
+              </p>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={isDeletingAccount}
+                  className="w-full bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-red-900/20 transition-all flex items-center justify-center gap-2"
+                >
+                  {isDeletingAccount ? (
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <FaUserSlash /> Permanently Delete My Account
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={isDeletingAccount}
+                  className="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-bold py-4 rounded-2xl transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>

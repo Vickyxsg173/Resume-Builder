@@ -305,6 +305,28 @@ app.post("/api/profile/resumes", ensureAuth, async (req, res) => {
   }
 });
 
+// 🗑️ Delete user account & data
+app.delete("/api/profile", ensureAuth, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    // Delete the user from MongoDB
+    await User.findByIdAndDelete(userId);
+    
+    // Logout the user and destroy session
+    req.logout((err) => {
+      if (err) return res.status(500).json({ error: "Failed to logout during deletion" });
+      req.session.destroy((err) => {
+        if (err) return res.status(500).json({ error: "Failed to destroy session" });
+        res.clearCookie('connect.sid'); // Clear default session cookie
+        res.json({ success: true, message: "Account deleted successfully" });
+      });
+    });
+  } catch (err) {
+    console.error("Account deletion error:", err);
+    res.status(500).json({ error: "Failed to delete account" });
+  }
+});
+
 // 🗑️ Delete a saved resume
 app.delete("/api/profile/resumes/:resumeId", ensureAuth, async (req, res) => {
   try {
