@@ -287,8 +287,8 @@ const Profile = () => {
       alert("Profile photo updated successfully!");
     } catch (err) {
       console.error("Upload error:", err);
-      // Show actual Supabase error for debugging
-      alert(`Upload failed: ${err.message || "Unknown error"}. Check if bucket 'avatars' exists and has 'INSERT' policies.`);
+      const urlUsed = import.meta.env.VITE_SUPABASE_URL;
+      alert(`Upload failed: ${err.message || "Failed to fetch"}.\n\nURL used: ${urlUsed || "UNDEFINED"}\n\nCheck if this URL is set in your production environment variables.`);
     } finally {
       setIsUploadingImage(false);
     }
