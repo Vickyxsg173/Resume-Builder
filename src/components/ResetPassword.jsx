@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { RiLockPasswordLine, RiShieldKeyholeLine } from "react-icons/ri";
+import { RiLockPasswordLine, RiShieldKeyholeLine, RiEyeLine, RiEyeOffLine } from "react-icons/ri";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -12,6 +12,8 @@ const ResetPassword = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -74,25 +76,39 @@ const ResetPassword = () => {
             <div className="relative">
               <RiLockPasswordLine className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="New Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+              >
+                {showPassword ? <RiEyeOffLine size={20} /> : <RiEyeLine size={20} />}
+              </button>
             </div>
 
             <div className="relative">
               <RiLockPasswordLine className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Confirm New Password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+              >
+                {showConfirmPassword ? <RiEyeOffLine size={20} /> : <RiEyeLine size={20} />}
+              </button>
             </div>
 
             {error && <p className="text-red-400 text-xs text-center">{error}</p>}

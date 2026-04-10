@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { RiShieldKeyholeLine, RiMailLine, RiLockPasswordLine, RiUserLine } from "react-icons/ri";
+import { RiShieldKeyholeLine, RiMailLine, RiLockPasswordLine, RiUserLine, RiEyeLine, RiEyeOffLine } from "react-icons/ri";
 import { MdAutoAwesome, MdHistory, MdSpeed, MdArrowBack } from "react-icons/md";
 import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "react-i18next";
@@ -26,6 +26,7 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Prevent body scroll while gate is visible
   useEffect(() => {
@@ -135,14 +136,21 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
       <div className="relative">
         <RiLockPasswordLine className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
         />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-white transition-colors"
+        >
+          {showPassword ? <RiEyeOffLine size={20} /> : <RiEyeLine size={20} />}
+        </button>
       </div>
 
       {!isSignup && (
