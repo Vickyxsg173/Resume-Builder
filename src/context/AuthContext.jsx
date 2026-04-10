@@ -61,6 +61,17 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateProfileImage = async (image) => {
+    try {
+      const { data } = await axios.patch("/api/profile/image", { image });
+      setUser(data);
+      return data;
+    } catch (error) {
+      console.error("Failed to update profile image:", error);
+      throw error;
+    }
+  };
+
   const saveResume = async (title, content) => {
     try {
       const { data } = await axios.post("/api/profile/resumes", { title, content });
@@ -73,7 +84,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout, updateSkills, saveResume, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout, updateSkills, updateProfileImage, saveResume, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

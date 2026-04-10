@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@openrouter/sdk": "^0.9.11",
+    "@supabase/supabase-js": "^2.103.0",
     "@vitejs/plugin-react": "^6.0.0",
     "autoprefixer": "^10.4.27",
     "axios": "^1.13.6",

@@ -293,6 +293,17 @@ app.patch("/api/profile/skills", ensureAuth, async (req, res) => {
   }
 });
 
+app.patch("/api/profile/image", ensureAuth, async (req, res) => {
+  try {
+    const { image } = req.body;
+    const user = await User.findByIdAndUpdate(req.user._id, { image }, { new: true });
+    res.json(user);
+  } catch (err) {
+    console.error("Failed to update profile image:", err);
+    res.status(500).json({ error: "Failed to update profile image" });
+  }
+});
+
 app.post("/api/profile/resumes", ensureAuth, async (req, res) => {
   try {
     const { title, content } = req.body;

@@ -11,8 +11,10 @@ import {
   FaFileAlt, FaCrown, FaSignInAlt, FaChartBar,
   FaCalendarAlt, FaCheckCircle, FaInbox,
   FaTimes, FaDownload, FaSearch, FaUserCog,
-  FaExclamationTriangle, FaUserSlash
+  FaExclamationTriangle, FaUserSlash, FaCamera
 } from 'react-icons/fa';
+import { supabase } from '../lib/supabase';
+import { useRef } from 'react';
 
 const TIER_LIMITS = {
   none: { gen: 5, int: 15 },
@@ -201,9 +203,11 @@ const AdminUserRow = ({ user, onUpdate, isUpdating, t }) => {
 const Profile = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { user, isAuthenticated, loading, updateSkills, checkAuth } = useAuth();
+  const { user, isAuthenticated, loading, updateSkills, updateProfileImage, checkAuth } = useAuth();
+  const fileInputRef = useRef(null);
   const [newSkill, setNewSkill] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [credits, setCredits] = useState(null);
   const [messages, setMessages] = useState([]);
   const [adminUsers, setAdminUsers] = useState([]);
@@ -232,6 +236,55 @@ const Profile = () => {
       if (user?.isAdmin) fetchMessages();
     }
   }, [isAuthenticated, user?.isAdmin]);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate if it's an image
+    if (!file.type.startsWith('image/')) {
+      alert("Please upload an image file.");
+      return;
+    }
+
+    // Limit size (e.g. 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert("File size should be less than 2MB.");
+      return;
+    }
+
+    setIsUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user._id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      // 1. Upload to Supabase
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // 2. Get Public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // 3. Save to MongoDB
+      await updateProfileImage(publicUrl);
+      
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Failed to upload image. Please ensure your Supabase storage bucket 'avatars' is public.");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   if (loading) return (
     <div className="h-screen flex items-center justify-center bg-neutral-950">
@@ -442,13 +495,40 @@ const Profile = () => {
         <div className="relative bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 backdrop-blur border border-neutral-700/60 rounded-3xl p-6 md:p-8 mb-6 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none" />
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="relative">
-              <img
-                src={user.image}
-                alt={user.displayName}
-                className="w-24 h-24 rounded-full border-4 border-orange-500 shadow-xl shadow-orange-500/20"
-                referrerPolicy="no-referrer"
+            <div className="relative group/avatar">
+              <div 
+                className="relative overflow-hidden w-24 h-24 rounded-full border-4 border-orange-500 shadow-xl shadow-orange-500/20 cursor-pointer"
+                onClick={handleImageClick}
+              >
+                <img
+                  src={user.image}
+                  alt={user.displayName}
+                  className={`w-full h-full object-cover transition-transform group-hover/avatar:scale-110 ${isUploadingImage ? 'opacity-30' : ''}`}
+                  referrerPolicy="no-referrer"
+                />
+                
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                  <FaCamera size={20} className="text-white" />
+                </div>
+
+                {/* Loading Spinner */}
+                {isUploadingImage && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              {/* Hidden File Input */}
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+                accept="image/*"
               />
+
               {user.isAdmin && (
                 <span className="absolute -bottom-1 -right-1 bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                   <FaCrown size={10} /> Admin
