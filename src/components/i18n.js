@@ -174,7 +174,7 @@ i18n
           profile_free_tier: "Free Tier",
 
           // Premium
-          premium_title: "🚀 Upgrade to Premium",
+          premium_title: "👑 Upgrade to Premium",
           premium_desc_resume: "You've reached your daily generation limit. Upgrade to Monthly (10/day) or Yearly (20/day) to empower your career journey!",
           premium_desc_interview: "You've reached your daily interview limit. Upgrade to Monthly (30/day) or Yearly (50/day) to master your skills!",
           premium_profile_desc: "Upgrade to our Monthly or Yearly Premium tiers to unlock higher daily limits for AI resumes and interview sessions!",

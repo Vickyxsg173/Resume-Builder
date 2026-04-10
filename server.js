@@ -237,17 +237,35 @@ const checkAndResetCredits = async (req, res, next) => {
 };
 
 // 📊 Tiered Limits Helper
+const TIER_DEFAULTS = {
+  none: { gen: 5, int: 15 },
+  monthly: { gen: 10, int: 30 },
+  yearly: { gen: 20, int: 50 }
+};
+
 const getTierLimits = (user) => {
   if (user.isAdmin) return { generationLimit: Infinity, interviewLimit: Infinity, tierName: "Admin" };
   
   let name = "Free";
+  let defaults = TIER_DEFAULTS.none;
+
   if (user.isPremium) {
     name = user.premiumType === "yearly" ? "Yearly Premium" : "Monthly Premium";
+    defaults = user.premiumType === "yearly" ? TIER_DEFAULTS.yearly : TIER_DEFAULTS.monthly;
   }
   
+  // 🧠 Smart Logic:
+  // 1. Start with database value or tier fallback
+  let gen = user.generationLimit || defaults.gen;
+  let int = user.interviewLimit || defaults.int;
+
+  // 2. Auto-fix: If user is premium but has free-tier limits, upgrade them to tier defaults
+  if (user.isPremium && gen <= TIER_DEFAULTS.none.gen) gen = defaults.gen;
+  if (user.isPremium && int <= TIER_DEFAULTS.none.int) int = defaults.int;
+  
   return { 
-    generationLimit: user.generationLimit || 5, 
-    interviewLimit: user.interviewLimit || 15, 
+    generationLimit: gen, 
+    interviewLimit: int, 
     tierName: name 
   };
 };

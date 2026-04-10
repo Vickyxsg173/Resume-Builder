@@ -13,6 +13,12 @@ import {
   FaTimes, FaDownload, FaSearch, FaUserCog
 } from 'react-icons/fa';
 
+const TIER_LIMITS = {
+  none: { gen: 5, int: 15 },
+  monthly: { gen: 10, int: 30 },
+  yearly: { gen: 20, int: 50 }
+};
+
 const StatCard = ({ icon, label, value, max, color, remainingText }) => {
   const pct = max && max !== Infinity ? Math.min((value / max) * 100, 100) : 100;
   const isUnlimited = max === Infinity || max === null;
@@ -80,7 +86,12 @@ const AdminUserCard = ({ user, onUpdate, isUpdating, t }) => {
           <label className="text-[10px] uppercase text-neutral-500 font-bold">{t("admin_user_tier")}</label>
           <select
             value={tier}
-            onChange={(e) => setTier(e.target.value)}
+            onChange={(e) => {
+              const newTier = e.target.value;
+              setTier(newTier);
+              setGenLimit(TIER_LIMITS[newTier].gen);
+              setIntLimit(TIER_LIMITS[newTier].int);
+            }}
             className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-2 py-2 text-xs focus:outline-none focus:border-orange-500 text-neutral-300"
           >
             <option value="none">{t("profile_free")}</option>
@@ -139,7 +150,12 @@ const AdminUserRow = ({ user, onUpdate, isUpdating, t }) => {
       <td className="px-4 py-4">
         <select
           value={tier}
-          onChange={(e) => setTier(e.target.value)}
+          onChange={(e) => {
+            const newTier = e.target.value;
+            setTier(newTier);
+            setGenLimit(TIER_LIMITS[newTier].gen);
+            setIntLimit(TIER_LIMITS[newTier].int);
+          }}
           className="bg-neutral-800 border border-neutral-700 rounded-lg px-2 py-1 text-xs focus:outline-none focus:border-orange-500 text-neutral-300"
         >
           <option value="none">{t("profile_free")}</option>
