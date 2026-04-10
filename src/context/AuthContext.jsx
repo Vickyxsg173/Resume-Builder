@@ -39,6 +39,30 @@ export const AuthProvider = ({ children }) => {
     window.location.href = `${API_BASE_URL}/auth/google`;
   };
 
+  const loginEmail = async (email, password) => {
+    try {
+      const { data } = await axios.post("/auth/login", { email, password });
+      setUser(data.user);
+      setIsAuthenticated(true);
+      return data;
+    } catch (error) {
+      console.error("Local login failed:", error);
+      throw error;
+    }
+  };
+
+  const signupEmail = async (email, password, displayName) => {
+    try {
+      const { data } = await axios.post("/auth/signup", { email, password, displayName });
+      setUser(data.user);
+      setIsAuthenticated(true);
+      return data;
+    } catch (error) {
+      console.error("Local signup failed:", error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await axios.get("/auth/logout");
@@ -83,8 +107,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const forgotPassword = async (email) => {
+    try {
+      const { data } = await axios.post('/auth/forgot-password', { email });
+      return { success: true, message: data.message };
+    } catch (err) {
+      return { success: false, error: err.response?.data?.error || "Failed to process request" };
+    }
+  };
+
+  const resetPassword = async (token, password) => {
+    try {
+      const { data } = await axios.post(`/auth/reset-password/${token}`, { password });
+      if (data.success) {
+        setUser(data.user);
+        setIsAuthenticated(true);
+        return { success: true };
+      }
+    } catch (err) {
+      return { success: false, error: err.response?.data?.error || "Failed to reset password" };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, logout, updateSkills, updateProfileImage, saveResume, checkAuth }}>
+    <AuthContext.Provider value={{ user, loading, isAuthenticated, login, loginEmail, signupEmail, logout, updateSkills, updateProfileImage, saveResume, forgotPassword, resetPassword, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

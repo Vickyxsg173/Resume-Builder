@@ -13,6 +13,8 @@ import Profile from "./components/Profile.jsx";
 import News from "./components/News.jsx";
 import InterviewPrep from "./components/InterviewPrep.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import ResetPassword from "./components/ResetPassword.jsx";
+
 import { useTranslation } from "react-i18next";
 import i18n from "i18next";
 import { BrowserRouter,Routes,Route,Link, useLocation } from "react-router-dom";
@@ -120,6 +122,8 @@ function App(){
                 <ProtectedRoute><Build/></ProtectedRoute>
               }/>
               <Route path="/About" element={<About/>}/>
+              <Route path="/reset-password/:token" element={<ResetPassword/>}/>
+
             </Routes>
           </div>
           {/* AI Chat FAB */}

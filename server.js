@@ -15,6 +15,11 @@ import path from "path";
 import { fileURLToPath } from 'url';
 import Razorpay from "razorpay";
 import crypto from "crypto";
+import { Strategy as LocalStrategy } from "passport-local";
+import bcrypt from "bcryptjs";
+import nodemailer from "nodemailer";
+
+
 
 // 🛑 GLOBAL ERROR HANDLERS (Absolute Top)
 process.on('uncaughtException', (err) => {
@@ -141,21 +146,47 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
       };
 
       try {
+        const email = profile.emails[0].value;
         const adminEmails = (process.env.ADMIN_EMAILS || "").split(",");
-        const isAdmin = adminEmails.includes(profile.emails[0].value);
+        const isAdmin = adminEmails.includes(email);
         
+        // 1. Try finding by Google ID
         let user = await User.findOne({ googleId: profile.id });
+        
         if (user) {
-          // Update admin status if it changed
+          // User exists via Google
           user.isAdmin = isAdmin;
           await user.save();
-          done(null, user);
-        } else {
-          user = await User.create({ ...newUser, isAdmin });
-          done(null, user);
+          return done(null, user);
         }
+
+        // 2. Try finding by Email (to link accounts)
+        user = await User.findOne({ email });
+        
+        if (user) {
+          // Link Google to existing Email account
+          user.googleId = profile.id;
+          // Use Google photo if they don't have a custom one
+          if (!user.image || user.image.includes('ui-avatars')) {
+            user.image = profile.photos[0].value;
+          }
+          await user.save();
+          return done(null, user);
+        }
+
+        // 3. Create new user
+        const newUserObj = {
+          googleId: profile.id,
+          displayName: profile.displayName,
+          email: email,
+          image: profile.photos[0].value,
+          isAdmin
+        };
+        user = await User.create(newUserObj);
+        done(null, user);
+        
       } catch (err) {
-        console.error(err);
+        console.error("Google Auth Error:", err);
         done(err, null);
       }
     }
@@ -163,6 +194,31 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
 } else {
   console.warn("⚠️  WARNING: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing. Authentication will not work.");
 }
+
+// 📧 Local Strategy Setup
+passport.use(new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password'
+  },
+  async (email, password, done) => {
+    try {
+      const user = await User.findOne({ email }).select('+password');
+      if (!user || !user.isLocal) {
+        return done(null, false, { message: 'Invalid email or password.' });
+      }
+
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) {
+        return done(null, false, { message: 'Invalid email or password.' });
+      }
+
+      return done(null, user);
+    } catch (err) {
+      return done(err);
+    }
+  }
+));
+
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -186,6 +242,127 @@ app.get("/auth/google/callback",
     res.redirect(frontendUrl);
   }
 );
+
+app.post("/auth/signup", async (req, res) => {
+  try {
+    const { email, password, displayName } = req.body;
+    
+    // Check if user exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already in use." });
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const adminEmails = (process.env.ADMIN_EMAILS || "").split(",");
+    const isAdmin = adminEmails.includes(email);
+
+    const newUser = await User.create({
+      email,
+      password: hashedPassword,
+      displayName: displayName || email.split('@')[0],
+      isLocal: true,
+      isAdmin,
+      image: `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName || email)}&background=random`
+    });
+
+    req.login(newUser, (err) => {
+      if (err) return res.status(500).json({ error: "Login failed after signup" });
+      res.status(201).json({ success: true, user: newUser });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Signup failed" });
+  }
+});
+
+// 📧 Forgot Password Route
+app.post("/auth/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user || !user.isLocal) {
+      // Don't reveal if user exists for security, but we'll show success anyway
+      return res.json({ success: true, message: "If that email exists, a reset link has been sent." });
+    }
+
+    // Create reset token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+    await user.save();
+
+    // Send Email
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_SERVICE || 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      from: `ResumeBuild <${process.env.EMAIL_USER}>`,
+      subject: 'Password Reset Request',
+      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+        `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
+        `${resetUrl}\n\n` +
+        `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+    };
+
+    // In development without credentials, log the link
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.log("--- DEVELOPMENT RESET LINK ---");
+      console.log(resetUrl);
+      console.log("------------------------------");
+    } else {
+      await transporter.sendMail(mailOptions);
+    }
+
+    res.json({ success: true, message: "If that email exists, a reset link has been sent." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to process forgot password" });
+  }
+});
+
+// 📧 Reset Password Route
+app.post("/auth/reset-password/:token", async (req, res) => {
+  try {
+    const { password } = req.body;
+    const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "Password reset token is invalid or has expired." });
+    }
+
+    // Set new password
+    user.password = await bcrypt.hash(password, 12);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    // Log the user in
+    req.login(user, (err) => {
+      if (err) return res.status(500).json({ error: "Login failed after reset" });
+      res.json({ success: true, message: "Password has been reset!", user });
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to reset password" });
+  }
+});
 
 app.get("/auth/logout", (req, res, next) => {
   req.logout((err) => {

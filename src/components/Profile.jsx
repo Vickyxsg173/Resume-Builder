@@ -15,6 +15,8 @@ import {
 } from 'react-icons/fa';
 import { supabase } from '../lib/supabase';
 import { useRef } from 'react';
+import AuthGate from './AuthGate';
+
 
 const TIER_LIMITS = {
   none: { gen: 5, int: 15 },
@@ -293,29 +295,9 @@ const Profile = () => {
   );
 
   if (!isAuthenticated) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-neutral-950 text-white px-6">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="text-center max-w-md"
-      >
-        <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mx-auto mb-6 text-4xl shadow-2xl shadow-orange-500/30">
-          👤
-        </div>
-        <h1 className="text-4xl font-extrabold mb-3">{t("profile_sign_in_heading")}</h1>
-        <p className="text-neutral-400 mb-8 leading-relaxed">
-          {t("profile_sign_in_desc")}
-        </p>
-        <button
-          onClick={() => window.location.href = '/auth/google'}
-          className="flex items-center gap-3 bg-white text-gray-800 px-8 py-4 rounded-2xl font-bold hover:bg-gray-100 transition-all shadow-xl mx-auto"
-        >
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />
-          {t("profile_sign_in_btn")}
-        </button>
-      </motion.div>
-    </div>
+    <AuthGate onClose={() => navigate("/")} />
   );
+
 
   const handleAddSkill = async (e) => {
     e.preventDefault();

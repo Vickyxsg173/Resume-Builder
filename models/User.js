@@ -3,8 +3,9 @@ import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema({
   googleId: {
     type: String,
-    required: true,
+    required: false,
     unique: true,
+    sparse: true, // Allow multiple nulls/undefined
   },
   displayName: {
     type: String,
@@ -14,6 +15,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+  },
+  password: {
+    type: String,
+    select: false, // Don't return password by default
+  },
+  isLocal: {
+    type: Boolean,
+    default: false,
   },
   image: {
     type: String,
@@ -70,6 +79,8 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date,
 });
 
 const User = mongoose.model('User', userSchema);
