@@ -261,34 +261,25 @@ const Profile = () => {
 
     setIsUploadingImage(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      // Simplify path: just the filename, not avatars/avatars/
-      const fileName = `${user._id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = fileName; 
+      const formData = new FormData();
+      formData.append('image', file);
 
-      // 1. Upload to Supabase
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true // Allow overwriting if same ID
-        });
+      // 1. Upload to our own Backend Proxy
+      const { data } = await axios.post('/api/profile/upload-photo', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
 
-      if (uploadError) throw uploadError;
+      if (!data.success) throw new Error(data.error || "Upload failed");
 
-      // 2. Get Public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      // 3. Save to MongoDB
-      await updateProfileImage(publicUrl);
+      // 2. Refresh state
+      await checkAuth();
       
       alert("Profile photo updated successfully!");
     } catch (err) {
-      console.error("Upload error:", err);
-      const urlUsed = import.meta.env.VITE_SUPABASE_URL;
-      alert(`Upload failed: ${err.message || "Failed to fetch"}.\n\nURL used: ${urlUsed || "UNDEFINED"}\n\nCheck if this URL is set in your production environment variables.`);
+      console.error("Backend upload error:", err);
+      alert(`Upload failed: ${err.response?.data?.error || err.message}`);
     } finally {
       setIsUploadingImage(false);
     }

@@ -18,6 +18,8 @@ import crypto from "crypto";
 import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcryptjs";
 import nodemailer from "nodemailer";
+import multer from 'multer';
+import { createClient } from '@supabase/supabase-js';
 
 
 
@@ -58,6 +60,18 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
     key_secret: process.env.RAZORPAY_KEY_SECRET,
   });
 }
+
+// 🏢 Supabase Admin (Server-side)
+const supabaseAdmin = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+// 📁 Multer Setup (Memory Storage)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
 
 const app = express();
 
@@ -451,6 +465,46 @@ const checkAndResetCredits = async (req, res, next) => {
   }
   next();
 };
+
+// 📸 Profile Photo Upload (Backend Secure Proxy)
+app.post("/api/profile/upload-photo", ensureAuth, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+    const file = req.file;
+    const fileExt = file.originalname.split('.').pop();
+    const fileName = `${req.user._id}-${Date.now()}.${fileExt}`;
+    const filePath = fileName;
+
+    // 1. Upload to Supabase Storage (using admin client to bypass CORS/Policies)
+    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+      .from('avatars')
+      .upload(filePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: true
+      });
+
+    if (uploadError) {
+      console.error("Supabase Admin Upload Error:", uploadError);
+      throw uploadError;
+    }
+
+    // 2. Get Public URL
+    const { data: { publicUrl } } = supabaseAdmin.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    // 3. Update User in MongoDB
+    await User.findByIdAndUpdate(req.user._id, { image: publicUrl });
+
+    console.log(`✅ Profile photo updated via Backend: ${req.user.email}`);
+    res.json({ success: true, publicUrl });
+
+  } catch (err) {
+    console.error("Backend Upload Failure:", err);
+    res.status(500).json({ error: "Upload failed: " + (err.message || "Unknown error") });
+  }
+});
 
 // 📊 Tiered Limits Helper
 const TIER_DEFAULTS = {
