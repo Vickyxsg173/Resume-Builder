@@ -202,16 +202,33 @@ passport.use(new LocalStrategy({
   },
   async (email, password, done) => {
     try {
-      const user = await User.findOne({ email }).select('+password');
-      if (!user || !user.isLocal) {
+      const normalizedEmail = email.toLowerCase();
+      console.log(`🔍 [LOGIN] Attempting for: ${normalizedEmail}`);
+      
+      const user = await User.findOne({ email: normalizedEmail }).select('+password');
+      if (!user) {
+        console.log(`❌ [LOGIN] User not found: ${normalizedEmail}`);
         return done(null, false, { message: 'Invalid email or password.' });
       }
+      if (!user.isLocal) {
+        console.log(`❌ [LOGIN] User is NOT local (Google login user): ${normalizedEmail}`);
+        return done(null, false, { message: 'This account uses Google Login.' });
+      }
 
+      console.log(`🗝️ [LOGIN] Comparing passwords...`);
+      // LOG DATA FOR DEBUGGING (SAFE)
+      console.log(`   - Input Password Length: ${password.length}`);
+      console.log(`   - Stored Hash Length: ${user.password.length}`);
+      console.log(`   - Stored Hash Prefix: ${user.password.substring(0, 7)}...`);
+      
       const isMatch = await bcrypt.compare(password, user.password);
+      
       if (!isMatch) {
+        console.log(`❌ [LOGIN] Password mismatch for: ${normalizedEmail}`);
         return done(null, false, { message: 'Invalid email or password.' });
       }
 
+      console.log(`✅ [LOGIN] Success: ${normalizedEmail}`);
       return done(null, user);
     } catch (err) {
       return done(err);
@@ -234,6 +251,18 @@ passport.deserializeUser(async (id, done) => {
 });
 
 // 🚦 Auth Routes
+app.post("/auth/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.status(401).json({ error: info.message || "Login failed" });
+    
+    req.login(user, (err) => {
+      if (err) return next(err);
+      res.json({ success: true, user });
+    });
+  })(req, res, next);
+});
+
 app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
 
 app.get("/auth/google/callback", 
@@ -246,9 +275,10 @@ app.get("/auth/google/callback",
 app.post("/auth/signup", async (req, res) => {
   try {
     const { email, password, displayName } = req.body;
+    const normalizedEmail = email.toLowerCase();
     
     // Check if user exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ error: "Email already in use." });
     }
@@ -282,7 +312,8 @@ app.post("/auth/signup", async (req, res) => {
 app.post("/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user || !user.isLocal) {
       // Don't reveal if user exists for security, but we'll show success anyway
       return res.json({ success: true, message: "If that email exists, a reset link has been sent." });
@@ -346,17 +377,25 @@ app.post("/auth/reset-password/:token", async (req, res) => {
       return res.status(400).json({ error: "Password reset token is invalid or has expired." });
     }
 
-    // Set new password
-    user.password = await bcrypt.hash(password, 12);
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
+    // Atomic Update with hashed password
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      user._id,
+      { 
+        password: hashedPassword,
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined
+      },
+      { new: true }
+    );
 
-    await user.save();
+    console.log(`✅ Password atomically reset for: ${updatedUser.email}`);
 
     // Log the user in
-    req.login(user, (err) => {
+    req.login(updatedUser, (err) => {
       if (err) return res.status(500).json({ error: "Login failed after reset" });
-      res.json({ success: true, message: "Password has been reset!", user });
+      res.json({ success: true, message: "Password has been reset!", user: updatedUser });
     });
   } catch (err) {
     console.error(err);

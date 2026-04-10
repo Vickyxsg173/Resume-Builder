@@ -39,10 +39,13 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
     setError("");
     setLoading(true);
     try {
-      await loginEmail(email, password);
+      const result = await loginEmail(email, password);
+      if (!result.success) {
+        setError(result.error);
+      }
       // On success, the component will unmount because auth state changes
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed. Please check your credentials.");
+      setError("Login failed. Please check your network connection.");
     } finally {
       setLoading(false);
     }
@@ -53,9 +56,12 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
     setError("");
     setLoading(true);
     try {
-      await signupEmail(email, password, displayName);
+      const result = await signupEmail(email, password, displayName);
+      if (!result.success) {
+        setError(result.error);
+      }
     } catch (err) {
-      setError(err.response?.data?.error || "Signup failed. Try a different email.");
+      setError("Signup failed. Please check your network connection.");
     } finally {
       setLoading(false);
     }
@@ -116,6 +122,7 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          autoComplete="email"
           className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
         />
       </div>
@@ -128,6 +135,7 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
             placeholder="Full Name (Optional)"
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
+            autoComplete="name"
             className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
           />
         </div>
@@ -142,6 +150,7 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
+          autoComplete={isSignup ? "new-password" : "current-password"}
           className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-12 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
         />
         <button
