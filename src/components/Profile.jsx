@@ -273,8 +273,8 @@ const Profile = () => {
 
       if (!data.success) throw new Error(data.error || "Upload failed");
 
-      // 2. Refresh state
-      await checkAuth();
+      // 2. Refresh state with the newly returned user data
+      await checkAuth(); 
       
       alert("Profile photo updated successfully!");
     } catch (err) {

@@ -494,11 +494,15 @@ app.post("/api/profile/upload-photo", ensureAuth, upload.single('image'), async 
       .from('avatars')
       .getPublicUrl(filePath);
 
-    // 3. Update User in MongoDB
-    await User.findByIdAndUpdate(req.user._id, { image: publicUrl });
+    // 3. Update User in MongoDB and get the fresh document
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id, 
+      { image: publicUrl },
+      { new: true }
+    );
 
     console.log(`✅ Profile photo updated via Backend: ${req.user.email}`);
-    res.json({ success: true, publicUrl });
+    res.json({ success: true, user: updatedUser });
 
   } catch (err) {
     console.error("Backend Upload Failure:", err);
