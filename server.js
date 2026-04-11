@@ -9,6 +9,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
 import User from "./models/User.js";
 import Message from "./models/Message.js";
+import MongoStore from "connect-mongo";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import path from "path";
@@ -133,6 +134,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'secret-key',
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI,
+    ttl: 14 * 24 * 60 * 60, // sessions expire in 14 days
+    autoRemove: 'native' 
+  }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 24 hours
     httpOnly: true, // Prevents XSS from reading cookies
