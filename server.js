@@ -1088,6 +1088,11 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.resolve(__dirname, "dist", "index.html"));
   });
 }
+// 🏥 Health Check Route
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
