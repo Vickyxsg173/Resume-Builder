@@ -757,6 +757,23 @@ app.patch("/api/admin/users/:userId", ensureAdmin, async (req, res) => {
   }
 });
 
+app.delete("/api/admin/users/:userId", ensureAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    // Prevent admin from deleting themselves
+    if (userId === req.user._id.toString()) {
+      return res.status(403).json({ error: "You cannot delete your own admin account." });
+    }
+
+    await User.findByIdAndDelete(userId);
+    res.json({ success: true, message: "User deleted successfully" });
+  } catch (err) {
+    console.error("Admin user deletion error:", err);
+    res.status(500).json({ error: "Failed to delete user" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 
 // 🔥 MAIN ROUTE — Auth required: history tracking + prevents API abuse

@@ -65,7 +65,7 @@ const StatCard = ({ icon, label, value, max, color, remainingText }) => {
   );
 };
 
-const AdminUserCard = ({ user, onUpdate, isUpdating, t }) => {
+const AdminUserCard = ({ user, onUpdate, onDelete, isUpdating, isDeleting, t }) => {
   const [tier, setTier] = useState(user.premiumType || 'none');
   const [genLimit, setGenLimit] = useState(user.generationLimit || 5);
   const [intLimit, setIntLimit] = useState(user.interviewLimit || 15);
@@ -81,8 +81,17 @@ const AdminUserCard = ({ user, onUpdate, isUpdating, t }) => {
           <div className="font-bold text-white">{user.displayName}</div>
           <div className="text-xs text-neutral-500">{user.email}</div>
         </div>
-        <div className="text-[10px] text-neutral-600 bg-neutral-900 px-2 py-1 rounded-md">
-          ID: {user._id.slice(-6)}
+        <div className="flex items-center gap-2">
+          <div className="text-[10px] text-neutral-600 bg-neutral-900 px-2 py-1 rounded-md">
+            ID: {user._id.slice(-6)}
+          </div>
+          <button 
+            onClick={() => onDelete(user._id, user.displayName)}
+            disabled={isDeleting}
+            className="p-2 text-neutral-600 hover:text-red-500 transition-colors"
+          >
+            {isDeleting ? <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" /> : <FaTrash size={14} />}
+          </button>
         </div>
       </div>
       
@@ -137,7 +146,7 @@ const AdminUserCard = ({ user, onUpdate, isUpdating, t }) => {
   );
 };
 
-const AdminUserRow = ({ user, onUpdate, isUpdating, t }) => {
+const AdminUserRow = ({ user, onUpdate, onDelete, isUpdating, isDeleting, t }) => {
   const [tier, setTier] = useState(user.premiumType || 'none');
   const [genLimit, setGenLimit] = useState(user.generationLimit || 5);
   const [intLimit, setIntLimit] = useState(user.interviewLimit || 15);
@@ -188,15 +197,24 @@ const AdminUserRow = ({ user, onUpdate, isUpdating, t }) => {
         </div>
       </td>
       <td className="px-4 py-4 text-right">
-        {hasChanges && (
+        <div className="flex items-center justify-end gap-2">
+          {hasChanges && (
+            <button
+              onClick={() => onUpdate(user._id, { premiumType: tier, generationLimit: genLimit, interviewLimit: intLimit })}
+              disabled={isUpdating}
+              className="bg-orange-600 hover:bg-orange-500 text-white text-[10px] uppercase tracking-tighter font-black px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
+            >
+              {isUpdating ? '...' : t("admin_save_btn")}
+            </button>
+          )}
           <button
-            onClick={() => onUpdate(user._id, { premiumType: tier, generationLimit: genLimit, interviewLimit: intLimit })}
-            disabled={isUpdating}
-            className="bg-orange-600 hover:bg-orange-500 text-white text-[10px] uppercase tracking-tighter font-black px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
+            onClick={() => onDelete(user._id, user.displayName)}
+            disabled={isDeleting}
+            className="p-2 text-neutral-600 hover:text-red-500 transition-colors"
           >
-            {isUpdating ? '...' : t("admin_save_btn")}
+            {isDeleting ? <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" /> : <FaTrash size={14} />}
           </button>
-        )}
+        </div>
       </td>
     </tr>
   );
@@ -437,6 +455,23 @@ const Profile = () => {
       alert(t("admin_update_fail"));
     } finally {
       setIsUpdatingUser(null);
+    }
+  };
+
+  const handleAdminDeleteUser = async (userId, userName) => {
+    if (!window.confirm(`Are you sure you want to delete ${userName || 'this user'}'s account? This action is permanent.`)) {
+      return;
+    }
+    setDeletingId(userId);
+    try {
+      await axios.delete(`/api/admin/users/${userId}`);
+      alert("User account deleted successfully.");
+      fetchAdminUsers();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || "Failed to delete user account.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -880,7 +915,9 @@ const Profile = () => {
                             key={u._id} 
                             user={u} 
                             onUpdate={handleAdminUpdateUser} 
+                            onDelete={handleAdminDeleteUser}
                             isUpdating={isUpdatingUser === u._id}
+                            isDeleting={deletingId === u._id}
                             t={t}
                           />
                         ))}
@@ -900,7 +937,9 @@ const Profile = () => {
                         key={u._id} 
                         user={u} 
                         onUpdate={handleAdminUpdateUser} 
+                        onDelete={handleAdminDeleteUser}
                         isUpdating={isUpdatingUser === u._id}
+                        isDeleting={deletingId === u._id}
                         t={t}
                       />
                     ))}
