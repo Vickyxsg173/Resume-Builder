@@ -364,11 +364,20 @@ app.post("/auth/forgot-password", async (req, res) => {
       return res.json({ success: true, message: "Development: Link logged to server console." });
     }
 
+    // Diagnostic Logging (Non-sensitive)
+    if (isProduction) {
+      const maskedUser = process.env.EMAIL_USER ? `${process.env.EMAIL_USER.slice(0, 3)}***${process.env.EMAIL_USER.slice(-4)}` : "MISSING";
+      const passLen = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim().length : 0;
+      console.log(`🔍 Diagnostic: User=${maskedUser} | PassLength=${passLen} | Service=${process.env.EMAIL_SERVICE || 'gmail'}`);
+    }
+
     const transporter = nodemailer.createTransport({
-      service: process.env.EMAIL_SERVICE || 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        pass: process.env.EMAIL_PASS?.trim(), // Ensure no stray spaces
       },
     });
 
