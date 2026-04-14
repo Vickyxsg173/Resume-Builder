@@ -967,6 +967,13 @@ CONTEXT OF THIS WEBSITE:
 - Home,Build,InterviewPrep,News,About,Contact,Profile these are the pages in my website
 - Details to enter in build page to create resume -> name,summary,skills,experience,projects,education
 
+TIER & PRICING DETAILS:
+- Free Tier: 5 Resume generations & 15 Interview sessions per day.
+- Monthly Premium (₹199/month): 10 Resume generations & 30 Interview sessions per day.
+- Yearly Premium (₹2299/year): 20 Resume generations & 50 Interview sessions per day.
+- To upgrade: Guide users to the 'Profile' page where they can click 'Upgrade Now' or 'Upgrade to Premium'.
+- All tiers include high-quality AI output and ATS-optimized formatting.
+
 STRICT RULES:
 - ABSOLUTELY DO NOT use bold text formatting (no asterisks **, no __).
 - Use clear, plain text for headings if needed.
@@ -1043,7 +1050,7 @@ app.delete("/api/admin/messages/:id", ensureAdmin, async (req, res) => {
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "dist")));
 
-  app.get("(.*)", (req, res) => {
+  app.get("/:path*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "dist", "index.html"));
   });
 }
