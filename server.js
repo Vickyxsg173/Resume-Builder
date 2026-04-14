@@ -370,8 +370,42 @@ app.post("/auth/forgot-password", async (req, res) => {
     console.log(`🔍 Diagnostic: User=${maskedUser} | PassLength=${passLen} | Env=${process.env.NODE_ENV || 'undefined'}`);
 
     // Email Sending Logic (Standard Nodemailer)
+    // Email Sending Logic (Hybrid approach)
+    
+    // 1. SendGrid API (Preferred for Production/Render)
+    if (process.env.SENDGRID_API_KEY) {
+      try {
+        console.log("🚀 Attempting SendGrid API for email transport...");
+        const response = await axios.post('https://api.sendgrid.com/v7/mail/send', {
+          personalizations: [{ to: [{ email: user.email }] }],
+          from: { email: process.env.EMAIL_FROM || process.env.EMAIL_USER, name: 'ResumeBuild' },
+          subject: 'Password Reset Request',
+          content: [{
+            type: 'text/plain',
+            value: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+                   `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
+                   `${resetUrl}\n\n` +
+                   `If you did not request this, please ignore this email and your password will remain unchanged.\n`
+          }]
+        }, {
+          headers: {
+            'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.status === 202) {
+          console.log(`📧 SendGrid API: Reset email successfully sent to: ${user.email}`);
+          return res.json({ success: true, message: "If that email exists, a reset link has been sent." });
+        }
+      } catch (sgError) {
+        console.error("❌ SendGrid API Error:", sgError.response?.data || sgError.message);
+      }
+    }
+
+    // 2. Standard SMTP (Fallback for Development)
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error("❌ ERROR: EMAIL_USER or EMAIL_PASS environment variables are missing!");
+      console.error("❌ ERROR: Email credentials (GMAIL or SENDGRID) are missing!");
       if (isProduction) {
         return res.status(500).json({ 
           error: "Email service is not configured on the server. Please contact administrator.",
@@ -388,8 +422,8 @@ app.post("/auth/forgot-password", async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       family: 4,      // FORCE IPv4 to avoid ENETUNREACH errors
-      logger: true,   // Keep debug logs active for one more test
-      debug: true,
+      logger: !isProduction,   // Only log in dev to avoid noise
+      debug: !isProduction,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS?.trim(), 
@@ -406,7 +440,7 @@ app.post("/auth/forgot-password", async (req, res) => {
           `${resetUrl}\n\n` +
           `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
       });
-      console.log(`📧 Reset email successfully sent to: ${user.email}`);
+      console.log(`📧 SMTP: Reset email successfully sent to: ${user.email}`);
       res.json({ success: true, message: "If that email exists, a reset link has been sent." });
     } catch (mailError) {
       console.error("❌ NodeMailer Error:", mailError.message);
