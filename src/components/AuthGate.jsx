@@ -196,6 +196,7 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
     </form>
   );
 
+  const renderForgotPassword = () => (
     <form onSubmit={handleForgotPassword} className="flex flex-col gap-4 w-full">
       <div className="flex flex-col gap-2">
         <p className="text-[10px] text-orange-400/70 text-center uppercase tracking-widest font-bold">
