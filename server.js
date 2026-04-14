@@ -331,7 +331,9 @@ app.post("/auth/forgot-password", async (req, res) => {
 
     await user.save();
 
-    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+    // Construct reset URL (Prefer FRONTEND_URL env, but ensure it's correct for prod)
+    const baseUrl = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+    const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
     const transporter = nodemailer.createTransport({
       service: process.env.EMAIL_SERVICE || 'gmail',
       auth: {
