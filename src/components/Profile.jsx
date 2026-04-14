@@ -282,7 +282,7 @@ const Profile = () => {
       const formData = new FormData();
       formData.append('image', file);
 
-      // 1. Upload to our own Backend Proxy
+      // Upload to Backend Proxy
       const { data } = await axios.post('/api/profile/upload-photo', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
@@ -291,7 +291,7 @@ const Profile = () => {
 
       if (!data.success) throw new Error(data.error || "Upload failed");
 
-      // 2. Refresh state with the newly returned user data
+      // Refresh state
       await checkAuth(); 
       
       alert("Profile photo updated successfully!");
@@ -340,10 +340,10 @@ const Profile = () => {
 
   const handleUpgrade = async (plan) => {
     try {
-      // 1. Create order on server
+      // Create order
       const { data: order } = await axios.post('/payment/create-order', { plan });
 
-      // 2. Open Razorpay Checkout
+      // Open Razorpay Checkout
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
@@ -353,7 +353,7 @@ const Profile = () => {
         order_id: order.id,
         handler: async (response) => {
           try {
-            // 3. Verify payment on server
+            // Verify payment
             const { data: verifyData } = await axios.post('/payment/verify', {
               ...response,
               plan
@@ -386,7 +386,6 @@ const Profile = () => {
     } catch (err) {
       console.error("Order creation error:", err);
       
-      // 🛡️ Improve 401 handling
       if (err.response?.status === 401) {
         alert("Your session has expired. Please log out and log back in to continue.");
         return;
@@ -505,7 +504,7 @@ const Profile = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-5xl mx-auto"
       >
-        {/* ── Header Card ── */}
+        // Header section
         <div className="relative bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 backdrop-blur border border-neutral-700/60 rounded-3xl p-6 md:p-8 mb-6 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none" />
           <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -521,12 +520,12 @@ const Profile = () => {
                   referrerPolicy="no-referrer"
                 />
                 
-                {/* Overlay on hover */}
+                // Overlay on hover
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
                   <FaCamera size={20} className="text-white" />
                 </div>
 
-                {/* Loading Spinner */}
+                // Loading Spinner
                 {isUploadingImage && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -534,7 +533,7 @@ const Profile = () => {
                 )}
               </div>
 
-              {/* Permanent Camera Badge */}
+              // Camera badge
               <button 
                 onClick={handleImageClick}
                 className="absolute bottom-0 right-0 bg-orange-500 text-white p-2 rounded-full shadow-lg border-2 border-neutral-950 hover:bg-orange-600 transition-colors z-10"
@@ -543,7 +542,7 @@ const Profile = () => {
                 <FaCamera size={12} />
               </button>
 
-              {/* Hidden File Input */}
+              // File input
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -582,7 +581,7 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* ── Tab Navigation ── */}
+        // Tab navigation
         <div className="flex gap-1 bg-neutral-900 border border-neutral-800 rounded-2xl p-1 mb-6 overflow-x-auto no-scrollbar scroll-smooth">
           {tabs.map(tab => (
             <button
@@ -599,7 +598,7 @@ const Profile = () => {
           ))}
         </div>
 
-        {/* ── Overview Tab ── */}
+        // Overview tab
         <AnimatePresence mode="wait">
           {activeTab === 'overview' && (
             <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -622,7 +621,7 @@ const Profile = () => {
                 />
               </div>
 
-              {/* Quick Summary */}
+              // Quick Summary
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
                 <h3 className="font-bold text-lg mb-4 text-neutral-200">{t("profile_account_summary")}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -674,7 +673,7 @@ const Profile = () => {
                   </div>
                 )}
 
-                {/* ── Danger Zone ── */}
+                // Danger zone
                 {!user?.isAdmin && (
                   <div className="mt-8 pt-8 border-t border-red-900/20">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-red-900/5 border border-red-900/20 rounded-2xl p-6">
@@ -699,7 +698,7 @@ const Profile = () => {
             </motion.div>
           )}
 
-          {/* ── Inbox Tab (Admin Only) ── */}
+          // Inbox tab (admin)
           {activeTab === 'inbox' && user?.isAdmin && (
             <motion.div key="inbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
@@ -756,7 +755,7 @@ const Profile = () => {
             </motion.div>
           )}
 
-          {/* ── Resumes Tab ── */}
+          // Resumes tab
           {activeTab === 'resumes' && (
             <motion.div key="resumes" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">

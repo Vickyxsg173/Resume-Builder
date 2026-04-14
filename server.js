@@ -24,7 +24,7 @@ import { createClient } from '@supabase/supabase-js';
 
 
 
-// 🛑 GLOBAL ERROR HANDLERS (Absolute Top)
+// Global error handlers
 process.on('uncaughtException', (err) => {
   console.error('💥 CRASH: Uncaught Exception!');
   console.error(err);
@@ -42,7 +42,7 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
-// 🔍 Environment Variable Validation
+// Environment variable validation
 const requiredEnv = ['OPENROUTER_API_KEY', 'MONGODB_URI', 'SESSION_SECRET', 'RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET'];
 requiredEnv.forEach(key => {
   if (!process.env[key]) {
@@ -62,13 +62,13 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
   });
 }
 
-// 🏢 Supabase Admin (Server-side)
+// Supabase initialization
 const supabaseAdmin = createClient(
   process.env.VITE_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// 📁 Multer Setup (Memory Storage)
+// Multer configuration
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
@@ -76,7 +76,7 @@ const upload = multer({
 
 const app = express();
 
-// 🔐 Security Headers
+// Security middleware
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
@@ -96,15 +96,14 @@ app.use(helmet({
 }));
 app.set('trust proxy', 1);
 
-// 🔌 MongoDB Connection
+// Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/resumeb')
   .then(() => console.log('✅ MongoDB Connected'))
   .catch(err => {
     console.error('❌ MongoDB Connection Error Details:', err.message);
-    // Optimization: Don't crash the server, just log the error
   });
 
-// 🛡️ Middleware
+// Middleware
 const isProduction = process.env.NODE_ENV === 'production';
 const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
@@ -114,40 +113,37 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// 🚦 Rate Limiting (Prevent AI Abuse)
+// Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per window
   message: "Too many requests from this IP, please try again after 15 minutes",
   standardHeaders: true,
   legacyHeaders: false,
-  skip: (req) => req.user && (req.user.isAdmin || req.user.isPremium), // 👑 Admin/Premium Bypass
 });
 
-// Apply limiter to expensive AI routes
 app.use("/generate-resume", apiLimiter);
 app.use("/api/chat", apiLimiter);
 app.use("/api/interview", apiLimiter);
 
-// 📦 Session Setup
+// Session configuration
 app.use(session({
   secret: process.env.SESSION_SECRET || 'secret-key',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    ttl: 14 * 24 * 60 * 60, // sessions expire in 14 days
-    autoRemove: 'native' 
+    autoRemove: 'native'
   }),
   cookie: {
     maxAge: 1000 * 60 * 60 * 24, // 24 hours
-    httpOnly: true, // Prevents XSS from reading cookies
+    httpOnly: true,
     secure: isProduction, // Cookies only over HTTPS in production
-    sameSite: isProduction ? 'none' : 'lax' // CSRF protection
+    sameSite: isProduction ? 'none' : 'lax'
   }
 }));
 
-// 🔑 Passport Setup (Conditional to prevent crash)
+// Passport setup
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -170,7 +166,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
         const adminEmails = (process.env.ADMIN_EMAILS || "").split(",");
         const isAdmin = adminEmails.includes(email);
         
-        // 1. Try finding by Google ID
         let user = await User.findOne({ googleId: profile.id });
         
         if (user) {
@@ -180,13 +175,11 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           return done(null, user);
         }
 
-        // 2. Try finding by Email (to link accounts)
         user = await User.findOne({ email });
         
         if (user) {
           // Link Google to existing Email account
           user.googleId = profile.id;
-          // Use Google photo if they don't have a custom one
           if (!user.image || user.image.includes('ui-avatars')) {
             user.image = profile.photos[0].value;
           }
@@ -194,7 +187,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
           return done(null, user);
         }
 
-        // 3. Create new user
         const newUserObj = {
           googleId: profile.id,
           displayName: profile.displayName,
@@ -215,7 +207,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   console.warn("⚠️  WARNING: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET is missing. Authentication will not work.");
 }
 
-// 📧 Local Strategy Setup
+// Local auth strategy
 passport.use(new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password'
@@ -236,9 +228,6 @@ passport.use(new LocalStrategy({
       }
 
       console.log(`🗝️ [LOGIN] Comparing passwords...`);
-      // LOG DATA FOR DEBUGGING (SAFE)
-      console.log(`   - Input Password Length: ${password.length}`);
-      console.log(`   - Stored Hash Length: ${user.password.length}`);
       console.log(`   - Stored Hash Prefix: ${user.password.substring(0, 7)}...`);
       
       const isMatch = await bcrypt.compare(password, user.password);
@@ -270,7 +259,7 @@ passport.deserializeUser(async (id, done) => {
   }
 });
 
-// 🚦 Auth Routes
+// Auth routes
 app.post("/auth/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
@@ -297,13 +286,11 @@ app.post("/auth/signup", async (req, res) => {
     const { email, password, displayName } = req.body;
     const normalizedEmail = email.toLowerCase();
     
-    // Check if user exists
     const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({ error: "Email already in use." });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const adminEmails = (process.env.ADMIN_EMAILS || "").split(",");
@@ -328,25 +315,22 @@ app.post("/auth/signup", async (req, res) => {
   }
 });
 
-// 📧 Forgot Password Route
+// Forgot password endpoint
 app.post("/auth/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
     const normalizedEmail = email.toLowerCase();
     const user = await User.findOne({ email: normalizedEmail });
     if (!user || !user.isLocal) {
-      // Don't reveal if user exists for security, but we'll show success anyway
       return res.json({ success: true, message: "If that email exists, a reset link has been sent." });
     }
 
-    // Create reset token
     const resetToken = crypto.randomBytes(20).toString('hex');
     user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
 
     await user.save();
 
-    // Send Email
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
     const transporter = nodemailer.createTransport({
       service: process.env.EMAIL_SERVICE || 'gmail',
@@ -366,10 +350,6 @@ app.post("/auth/forgot-password", async (req, res) => {
         `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
     };
 
-    // In development without credentials, log the link
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.log("--- DEVELOPMENT RESET LINK ---");
-      console.log(resetUrl);
       console.log("------------------------------");
     } else {
       await transporter.sendMail(mailOptions);
@@ -382,7 +362,7 @@ app.post("/auth/forgot-password", async (req, res) => {
   }
 });
 
-// 📧 Reset Password Route
+// Reset password endpoint
 app.post("/auth/reset-password/:token", async (req, res) => {
   try {
     const { password } = req.body;
@@ -397,7 +377,6 @@ app.post("/auth/reset-password/:token", async (req, res) => {
       return res.status(400).json({ error: "Password reset token is invalid or has expired." });
     }
 
-    // Atomic Update with hashed password
     const hashedPassword = await bcrypt.hash(password, 12);
     
     const updatedUser = await User.findByIdAndUpdate(
@@ -412,7 +391,6 @@ app.post("/auth/reset-password/:token", async (req, res) => {
 
     console.log(`✅ Password atomically reset for: ${updatedUser.email}`);
 
-    // Log the user in
     req.login(updatedUser, (err) => {
       if (err) return res.status(500).json({ error: "Login failed after reset" });
       res.json({ success: true, message: "Password has been reset!", user: updatedUser });
@@ -438,7 +416,7 @@ app.get("/auth/user", (req, res) => {
   }
 });
 
-// Profile & Customization Middleware
+// Auth middleware
 const ensureAuth = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
@@ -446,7 +424,7 @@ const ensureAuth = (req, res, next) => {
   res.status(401).json({ error: "Unauthorized" });
 };
 
-// 🔄 Daily Credits Reset Middleware
+// Credits reset middleware
 const checkAndResetCredits = async (req, res, next) => {
   if (!req.user || req.user.isAdmin) return next();
 
@@ -472,7 +450,7 @@ const checkAndResetCredits = async (req, res, next) => {
   next();
 };
 
-// 📸 Profile Photo Upload (Backend Secure Proxy)
+// Profile photo upload
 app.post("/api/profile/upload-photo", ensureAuth, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -495,12 +473,10 @@ app.post("/api/profile/upload-photo", ensureAuth, upload.single('image'), async 
       throw uploadError;
     }
 
-    // 2. Get Public URL
     const { data: { publicUrl } } = supabaseAdmin.storage
       .from('avatars')
       .getPublicUrl(filePath);
 
-    // 3. Update User in MongoDB and get the fresh document
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id, 
       { image: publicUrl },
@@ -516,7 +492,7 @@ app.post("/api/profile/upload-photo", ensureAuth, upload.single('image'), async 
   }
 });
 
-// 📊 Tiered Limits Helper
+// Tier limits helper
 const TIER_DEFAULTS = {
   none: { gen: 5, int: 15 },
   monthly: { gen: 10, int: 30 },
@@ -534,12 +510,9 @@ const getTierLimits = (user) => {
     defaults = user.premiumType === "yearly" ? TIER_DEFAULTS.yearly : TIER_DEFAULTS.monthly;
   }
   
-  // 🧠 Smart Logic:
-  // 1. Start with database value or tier fallback
   let gen = user.generationLimit || defaults.gen;
   let int = user.interviewLimit || defaults.int;
 
-  // 2. Auto-fix: If user is premium but has free-tier limits, upgrade them to tier defaults
   if (user.isPremium && gen <= TIER_DEFAULTS.none.gen) gen = defaults.gen;
   if (user.isPremium && int <= TIER_DEFAULTS.none.int) int = defaults.int;
   
@@ -550,7 +523,7 @@ const getTierLimits = (user) => {
   };
 };
 
-// 👑 Admin Authentication Middleware
+// Admin middleware
 const ensureAdmin = (req, res, next) => {
   if (req.isAuthenticated() && req.user.isAdmin) {
     return next();
@@ -558,7 +531,7 @@ const ensureAdmin = (req, res, next) => {
   res.status(403).json({ error: "Access denied. Admin privileges required." });
 };
 
-// 👤 Profile Routes
+// Profile routes
 app.get("/api/profile", ensureAuth, (req, res) => {
   res.json(req.user);
 });
@@ -596,7 +569,7 @@ app.post("/api/profile/resumes", ensureAuth, async (req, res) => {
   }
 });
 
-// 🗑️ Delete user account & data
+// Account deletion
 app.delete("/api/profile", ensureAuth, async (req, res) => {
   try {
     const userId = req.user._id;
@@ -608,7 +581,7 @@ app.delete("/api/profile", ensureAuth, async (req, res) => {
       if (err) return res.status(500).json({ error: "Failed to logout during deletion" });
       req.session.destroy((err) => {
         if (err) return res.status(500).json({ error: "Failed to destroy session" });
-        res.clearCookie('connect.sid'); // Clear default session cookie
+        res.clearCookie('connect.sid');
         res.json({ success: true, message: "Account deleted successfully" });
       });
     });
@@ -618,7 +591,7 @@ app.delete("/api/profile", ensureAuth, async (req, res) => {
   }
 });
 
-// 🗑️ Delete a saved resume
+// Delete resume
 app.delete("/api/profile/resumes/:resumeId", ensureAuth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -632,7 +605,7 @@ app.delete("/api/profile/resumes/:resumeId", ensureAuth, async (req, res) => {
   }
 });
 
-// 💳 Get Credits Info
+// Credits info endpoint
 app.get("/api/profile/credits", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
     const user = await User.findById(req.user._id);
@@ -653,13 +626,12 @@ app.get("/api/profile/credits", ensureAuth, checkAndResetCredits, async (req, re
   }
 });
 
-// 💳 Razorpay Payment Routes
+// Payment routes
 app.post("/payment/create-order", ensureAuth, async (req, res) => {
   if (!razorpay) {
     return res.status(503).json({ error: "Payment gateway is not configured" });
   }
-  const { plan } = req.body; // 'monthly' or 'yearly'
-  const amount = plan === "monthly" ? 19900 : 229900; // In paise (₹199 or ₹2299)
+  const amount = plan === "monthly" ? 19900 : 229900;
 
   try {
     const options = {
@@ -697,7 +669,6 @@ app.post("/payment/verify", ensureAuth, async (req, res) => {
 
   if (expectedSignature === razorpay_signature) {
     try {
-      // Set limits based on plan
       const genLimit = plan === 'yearly' ? 20 : 10;
       const intLimit = plan === 'yearly' ? 50 : 30;
 
@@ -725,7 +696,7 @@ app.post("/payment/verify", ensureAuth, async (req, res) => {
   }
 });
 
-// 🛠️ Admin Dashboard Endpoints
+// Admin routes
 app.get("/api/admin/users", ensureAdmin, async (req, res) => {
   try {
     const users = await User.find({}, "displayName email isPremium premiumType generationLimit interviewLimit createdAt").sort({ createdAt: -1 });
@@ -739,7 +710,6 @@ app.patch("/api/admin/users/:userId", ensureAdmin, async (req, res) => {
   try {
     const { premiumType, generationLimit, interviewLimit } = req.body;
     const isPremium = premiumType !== "none";
-    
     const user = await User.findByIdAndUpdate(
       req.params.userId,
       { 
@@ -759,7 +729,6 @@ app.patch("/api/admin/users/:userId", ensureAdmin, async (req, res) => {
 
 app.delete("/api/admin/users/:userId", ensureAdmin, async (req, res) => {
   try {
-    const { userId } = req.params;
     
     // Prevent admin from deleting themselves
     if (userId === req.user._id.toString()) {
@@ -776,7 +745,7 @@ app.delete("/api/admin/users/:userId", ensureAdmin, async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 
-// 🔥 MAIN ROUTE — Auth required: history tracking + prevents API abuse
+// Resume generation route
 app.post("/generate-resume", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
     // 🛡️ Limit Enforcement
@@ -790,7 +759,6 @@ app.post("/generate-resume", ensureAuth, checkAndResetCredits, async (req, res) 
 
     const userData = req.body;
 
-    // 🧠 Prompt Engineering
     const prompt = `
 You are an expert resume writer and ATS optimization specialist.
 
@@ -825,9 +793,6 @@ STRICT INSTRUCTIONS:
 - Keep it highly concise, avoiding generic fluff words like "hardworking".
 
 4. OUTPUT FORMAT:
-Return ONLY the final resume markdown text. Do not output any conversational filler or codeblocks.
-`;
-
     let aiResume = "";
     let retries = 2;
 
@@ -848,7 +813,7 @@ Return ONLY the final resume markdown text. Do not output any conversational fil
         );
 
         aiResume = response.data.choices[0].message.content;
-        break; // success
+        break;
       } catch (err) {
         if (retries === 0) throw err;
         console.log("Retrying due to rate limit...");
@@ -857,7 +822,6 @@ Return ONLY the final resume markdown text. Do not output any conversational fil
       }
     }
 
-    // 📊 Track usage & Return response
     await User.findByIdAndUpdate(req.user._id, { $inc: { generationsUsed: 1 } });
 
     res.json({
@@ -874,9 +838,9 @@ Return ONLY the final resume markdown text. Do not output any conversational fil
   }
 });
 
+// Interview routes
 app.get("/api/interview/start", ensureAuth, checkAndResetCredits, async (req, res) => {
   try {
-    // 🛡️ Limit Enforcement
     const limits = getTierLimits(req.user);
     if (!req.user.isAdmin && req.user.interviewsUsed >= limits.interviewLimit) {
       return res.status(403).json({ 
@@ -884,7 +848,6 @@ app.get("/api/interview/start", ensureAuth, checkAndResetCredits, async (req, re
       });
     }
 
-    // 📊 Track usage
     await User.findByIdAndUpdate(req.user._id, { $inc: { interviewsUsed: 1 } });
 
     const completion = await openrouter.chat.send({
@@ -949,19 +912,17 @@ Respond clearly in plain text. Do NOT ask any follow-up or next question.
 });
 
 
+// Hacker News route
 app.get("/api/hn-news", async (req, res) => {
   try {
-    // Step 1: Get top story IDs
     const response = await axios.get(
       "https://hacker-news.firebaseio.com/v0/topstories.json"
     );
 
     const ids = response.data;
 
-    // Step 2: Take first 5
     const topIds = ids.slice(0, 50);
 
-    // Step 3: Fetch all stories in parallel (Faster & more stable)
     const storyPromises = topIds.map(id => 
       axios.get(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
     );
@@ -974,7 +935,6 @@ app.get("/api/hn-news", async (req, res) => {
       author: res.data.by,
     }));
 
-    // Step 4: Send to frontend
     res.json({
       success: true,
       news: news,
@@ -986,6 +946,7 @@ app.get("/api/hn-news", async (req, res) => {
   }
 });
 
+// Chat route
 app.post("/api/chat", ensureAuth, async (req, res) => {
   const { messages } = req.body;
 
@@ -1043,7 +1004,7 @@ Your goal is to make the user successfully use THIS website, not anything else.`
   }
 });
 
-// 📬 Public Contact Route
+// Contact route
 app.post("/api/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
@@ -1058,7 +1019,7 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-// 🛡️ Admin Message Management
+// Admin message management
 app.get("/api/admin/messages", ensureAdmin, async (req, res) => {
   try {
     const messages = await Message.find().sort({ createdAt: -1 });
@@ -1077,10 +1038,10 @@ app.delete("/api/admin/messages/:id", ensureAdmin, async (req, res) => {
   }
 });
 
-// 🚀 Server Start
+// Server initialization
 
 
-// ✅ Serve Production Build (Unified Deployment)
+// Production build serving
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "dist")));
 
@@ -1088,7 +1049,7 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.resolve(__dirname, "dist", "index.html"));
   });
 }
-// 🏥 Health Check Route
+// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });

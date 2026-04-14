@@ -78,7 +78,7 @@ const Home = () => {
 
   return (
     <div className="bg-black">
-      {/* PAGE 1 */}
+      // Hero section
     <div className='w-full min-h-[100vh] bg-black text-white px-4 sm:px-[3vw] pt-[12vh] pb-8'>
       <div className='flex flex-col lg:flex-row gap-8 lg:gap-0'>
         <div className='mt-4 lg:mt-[10vh] w-full lg:w-[65vw]'>
@@ -110,7 +110,7 @@ const Home = () => {
       </div>
     </div>
 
-      {/* PAGE 2 */}
+      // Content section
       <div className='page-2 w-full bg-black text-white'>
         <div className="scroll-section w-full h-[100vh] overflow-hidden flex items-center">
           <div className="scroll-text whitespace-nowrap text-[20vw] sm:text-[30vw] md:text-[40vh] lg:text-[45vh] font-black text-white/90">
@@ -119,7 +119,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* PAGE 3 */}
+      // Final section
       <div className='page-3 w-full min-h-screen bg-black text-white px-6 sm:px-[8vw] md:px-[10vw] flex flex-col items-center justify-center text-center relative overflow-hidden'>
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,_rgba(255,106,0,0.05),transparent_70%)]" />
         
@@ -142,7 +142,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* FOOTER DECO */}
+      // Footer section
       <footer className="py-20 bg-black text-center text-neutral-700 border-t border-zinc-900">
           <p className="text-xs tracking-widest uppercase">RESUMEBUILD — EST. 2026</p>
       </footer>

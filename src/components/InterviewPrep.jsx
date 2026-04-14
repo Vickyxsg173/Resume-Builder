@@ -27,7 +27,6 @@ const InterviewPrep = () => {
     isMicrophoneAvailable
   } = useSpeechRecognition();
 
-  // Commit the transcript to the main answer when listening stops
   useEffect(() => {
     if (!listening && transcript) {
       setAnswer((prev) => prev + (prev.trim() && transcript.trim() ? " " : "") + transcript.trim());
@@ -149,13 +148,13 @@ const InterviewPrep = () => {
         {question && question !== "PREMIUM_LIMIT_REACHED" && (
           <div className="space-y-6">
             
-            {/* Question Card */}
+            // Question section
             <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl shadow-lg shadow-black/50 transition-all">
               <h2 className="text-sm uppercase tracking-wider text-orange-500 font-bold mb-3">{t("interview_question_label")}</h2>
               <p className="text-lg text-neutral-200 leading-relaxed font-medium">{question}</p>
             </div>
 
-            {/* Answer Card */}
+            // Answer section
             <div className={`bg-neutral-900 border transition-colors ${isReviewing ? 'border-neutral-800 opacity-80' : 'border-neutral-700'} p-6 rounded-xl shadow-lg shadow-black/50`}>
               <h2 className="text-sm uppercase tracking-wider text-emerald-400 font-bold mb-4">{t("interview_answer_label")}</h2>
               
@@ -212,7 +211,7 @@ const InterviewPrep = () => {
               )}
             </div>
 
-            {/* Feedback Card */}
+            // Feedback section
             {isReviewing && feedback && (
               <div className="bg-emerald-950/20 border border-emerald-900/50 p-6 rounded-xl shadow-lg shadow-emerald-900/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <h2 className="text-sm uppercase tracking-wider text-emerald-400 font-bold mb-4 flex items-center gap-2">

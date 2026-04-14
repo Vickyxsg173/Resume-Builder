@@ -41,14 +41,14 @@ const userSchema = new mongoose.Schema({
       },
     },
   ],
-  // 🔢 Usage Tracking
+  // Usage tracking
   generationsUsed: {
     type: Number,
     default: 0,
   },
   generationLimit: {
     type: Number,
-    default: 5, // Free tier: 5 resume generations per day
+    default: 5,
   },
   interviewsUsed: {
     type: Number,
@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
   },
   interviewLimit: {
     type: Number,
-    default: 15, // Free tier: 15 interview sessions per day
+    default: 15,
   },
   lastCreditReset: {
     type: Date,

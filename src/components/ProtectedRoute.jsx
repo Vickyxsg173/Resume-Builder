@@ -2,15 +2,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import AuthGate from "./AuthGate";
 
-/**
- * ProtectedRoute – shows the AuthGate overlay if the user is not authenticated.
- * While auth state is loading, renders a spinner.
- */
+// Protected route wrapper
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
 
-  // Wait until the auth check (GET /auth/user) resolves
   if (loading) {
     return (
       <div className="w-full min-h-screen bg-black flex items-center justify-center">
@@ -20,7 +16,6 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    // Show the login gate directly. If dismissed, go back home.
     return <AuthGate onClose={() => navigate("/")} />;
   }
 

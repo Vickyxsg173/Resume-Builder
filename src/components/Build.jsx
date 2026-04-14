@@ -34,7 +34,7 @@ const Build = () => {
     }
   }, [isAuthenticated, user]);
 
-  // 📂 Handle loading saved resume from profile
+// Load saved resume
   useEffect(() => {
     if (location.state?.resumeData) {
       const { title, content } = location.state.resumeData;
@@ -44,7 +44,6 @@ const Build = () => {
         name: title.split(' - ')[0] // Extract name from title if it follows "Name - Date" pattern
       }));
       
-      // Smooth scroll to resume output
       setTimeout(() => {
         const output = document.getElementById("resume-output");
         if (output) {
@@ -54,7 +53,7 @@ const Build = () => {
     }
   }, [location.state]);
 
-  // Handle input change
+// Input handlers
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -62,7 +61,7 @@ const Build = () => {
     });
   };
 
-  // Submit form
+// Form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -90,13 +89,11 @@ const Build = () => {
 
       if (data && data.resume) {
         setResume(data.resume);
-        // 🔖 Auto-save to profile if logged in
         if (isAuthenticated && saveResume) {
           const versionNumber = (user?.savedResumes?.length || 0) + 1;
           const title = `${formData.name || 'Resume'} - Version ${versionNumber}`;
           saveResume(title, data.resume).catch(() => {});
         }
-        // 📜 Auto-scroll to resume
         setTimeout(() => {
           document.getElementById("resume-output")?.scrollIntoView({ behavior: "smooth" });
         }, 100);
@@ -205,7 +202,7 @@ const Build = () => {
         </button>
       </form>
 
-      {/* Output */}
+// UI Output
       {resume && (
         <div className="mt-12 flex flex-col items-center pb-20 w-full overflow-x-auto">
           <div className="w-full max-w-[21cm] flex justify-end gap-3 mb-4 min-w-[320px] px-2">

@@ -46,7 +46,7 @@ function App(){
   useEffect(()=>{
     if(location.pathname === "/"){
       let ctx = gsap.context(()=>{
-        // 🎯 Animate the gathered refs
+        // Animate elements
         if (itemsRef.current.length > 0) {
           gsap.from(itemsRef.current, {
             y: -50,
@@ -126,7 +126,7 @@ function App(){
 
             </Routes>
           </div>
-          {/* AI Chat FAB */}
+          // AI Chat FAB
           <div ref={aichat}
             className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 cursor-pointer"
             onClick={() => setOpenChat(!openChat)}
@@ -145,13 +145,13 @@ function App(){
           {openChat && (
             <div className="fixed bottom-20 right-0 sm:right-6 w-full sm:w-[320px] h-[70vh] sm:h-[400px] max-h-[500px] bg-white border-2 border-orange-500 sm:rounded-xl shadow-xl z-50 flex flex-col">
               
-              {/* Header */}
+              // Header
               <div className="bg-orange-500 text-white p-3 sm:rounded-t-xl font-semibold flex items-center justify-between">
                 <span>AI Chat</span>
                 <button onClick={() => setOpenChat(false)} className="text-white/80 hover:text-white ml-auto text-xl leading-none">&times;</button>
               </div>
 
-              {/* --- Unauthenticated: Login Prompt --- */}
+              // Unauthenticated state
               {!isAuthenticated ? (
                 <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6 bg-neutral-950">
                   <div
@@ -176,7 +176,7 @@ function App(){
                 </div>
               ) : (
                 <>
-                  {/* Chat Body */}
+                  // Chat messages
                   <div className="flex-1 p-3 overflow-y-auto text-black text-sm space-y-2">
                     {messages.map((msg, index) => (
                       <div
@@ -212,7 +212,7 @@ function App(){
                     <div ref={chatEndRef} />
                   </div>
             
-                  {/* Input */}
+                  // Chat input
                   <div className="p-2 border-t flex">
                     <input 
                       type="text" 

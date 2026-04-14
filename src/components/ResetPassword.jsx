@@ -24,8 +24,6 @@ const ResetPassword = () => {
       return setError("Password must be at least 6 characters.");
     }
 
-    setError("");
-    setLoading(true);
     try {
       const result = await resetPassword(token, password);
       if (result.success) {

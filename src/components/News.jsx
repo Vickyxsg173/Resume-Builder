@@ -72,12 +72,12 @@ const News = () => {
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
         {loading ? (
-          // ── Showing Skeletons ──
+          // Loading state
           Array.from({ length: 12 }).map((_, i) => (
             <NewsSkeleton key={i} />
           ))
         ) : (
-          // ── Showing News Cards ──
+          // News content
           news.slice(0, visibleCount).map((item, index) => (
             <div
               key={index}
