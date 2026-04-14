@@ -376,7 +376,7 @@ app.post("/auth/forgot-password", async (req, res) => {
     if (process.env.SENDGRID_API_KEY) {
       try {
         console.log("🚀 Attempting SendGrid API for email transport...");
-        const response = await axios.post('https://api.sendgrid.com/v7/mail/send', {
+        const response = await axios.post('https://api.sendgrid.com/v3/mail/send', {
           personalizations: [{ to: [{ email: user.email }] }],
           from: { email: process.env.EMAIL_FROM || process.env.EMAIL_USER, name: 'ResumeBuild' },
           subject: 'Password Reset Request',
