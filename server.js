@@ -350,6 +350,7 @@ app.post("/auth/forgot-password", async (req, res) => {
         `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
     };
 
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       console.log("------------------------------");
     } else {
       await transporter.sendMail(mailOptions);
@@ -787,12 +788,9 @@ STRICT INSTRUCTIONS:
 - Projects
 - Education
 
-3. ATS OPTIMIZATION & CONTENT:
-- Ensure all bullet points use strong action verbs (Developed, Engineered, Optimized, Led).
-- Add measurable impact/metrics wherever logically inferable.
-- Keep it highly concise, avoiding generic fluff words like "hardworking".
+Return ONLY the final resume markdown text. Do not output any conversational filler or codeblocks.
+`;
 
-4. OUTPUT FORMAT:
     let aiResume = "";
     let retries = 2;
 
@@ -1045,7 +1043,7 @@ app.delete("/api/admin/messages/:id", ensureAdmin, async (req, res) => {
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "dist")));
 
-  app.get("/{*path}", (req, res) => {
+  app.get("*", (req, res) => {
     res.sendFile(path.resolve(__dirname, "dist", "index.html"));
   });
 }
