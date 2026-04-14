@@ -56,7 +56,7 @@ const Contact = () => {
   return (
     <div className="min-h-screen bg-black text-white font-sans flex items-center justify-center px-4 sm:p-6 pt-[10vh] relative overflow-hidden">
       
-      // Liquid background
+      {/* Liquid background */}
       <div className="absolute inset-0 pointer-events-none">
         <motion.div
           animate={{

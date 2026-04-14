@@ -248,7 +248,7 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
         <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, #f97316, #ef4444, #a855f7)" }} />
 
         <div className="p-8 flex flex-col items-center gap-6 overflow-y-auto max-h-[90vh]">
-          // Header
+          {/* Header */}
           <div className="flex flex-col items-center gap-4 text-center">
             <div
               className="w-14 h-14 rounded-2xl flex items-center justify-center"
@@ -267,7 +267,7 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
             </div>
           </div>
 
-          // Dynamic Content
+          {/* Dynamic Content */}
           {view === 'google' && (
             <>
               <ul className="w-full flex flex-col gap-3 text-left">
@@ -286,7 +286,7 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
           {view === 'signup-email' && renderEmailForm(true)}
           {view === 'forgot-password' && renderForgotPassword()}
 
-          // Dismiss
+          {/* Dismiss */}
           {onClose && (
             <button
               onClick={onClose}

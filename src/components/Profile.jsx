@@ -504,7 +504,7 @@ const Profile = () => {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-5xl mx-auto"
       >
-        // Header section
+        {/* Header section */}
         <div className="relative bg-gradient-to-br from-neutral-800/60 to-neutral-900/60 backdrop-blur border border-neutral-700/60 rounded-3xl p-6 md:p-8 mb-6 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none" />
           <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -520,12 +520,12 @@ const Profile = () => {
                   referrerPolicy="no-referrer"
                 />
                 
-                // Overlay on hover
+                {/* Overlay on hover */}
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
                   <FaCamera size={20} className="text-white" />
                 </div>
 
-                // Loading Spinner
+                {/* Loading Spinner */}
                 {isUploadingImage && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -533,7 +533,7 @@ const Profile = () => {
                 )}
               </div>
 
-              // Camera badge
+              {/* Camera badge */}
               <button 
                 onClick={handleImageClick}
                 className="absolute bottom-0 right-0 bg-orange-500 text-white p-2 rounded-full shadow-lg border-2 border-neutral-950 hover:bg-orange-600 transition-colors z-10"
@@ -542,7 +542,7 @@ const Profile = () => {
                 <FaCamera size={12} />
               </button>
 
-              // File input
+              {/* File input */}
               <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -581,7 +581,7 @@ const Profile = () => {
           </div>
         </div>
 
-        // Tab navigation
+        {/* Tab navigation */}
         <div className="flex gap-1 bg-neutral-900 border border-neutral-800 rounded-2xl p-1 mb-6 overflow-x-auto no-scrollbar scroll-smooth">
           {tabs.map(tab => (
             <button
@@ -598,7 +598,7 @@ const Profile = () => {
           ))}
         </div>
 
-        // Overview tab
+        {/* Overview tab */}
         <AnimatePresence mode="wait">
           {activeTab === 'overview' && (
             <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -621,7 +621,7 @@ const Profile = () => {
                 />
               </div>
 
-              // Quick Summary
+              {/* Quick Summary */}
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
                 <h3 className="font-bold text-lg mb-4 text-neutral-200">{t("profile_account_summary")}</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
@@ -646,34 +646,108 @@ const Profile = () => {
                 </div>
 
                 {!user?.isAdmin && !user?.isPremium && (
-                  <div className="mt-4 bg-gradient-to-r from-emerald-900/40 to-emerald-800/10 border border-emerald-500/40 rounded-xl p-5 flex flex-col lg:flex-row items-center justify-between gap-5 transition-all hover:border-emerald-500/70 shadow-lg shadow-emerald-900/20">
-                    <div className="text-center lg:text-left">
-                      <h4 className="text-emerald-400 font-bold text-lg mb-1">{t("premium_title")}</h4>
-                      <p className="text-neutral-400 text-sm max-w-sm">{t("premium_profile_desc")}</p>
-                    </div>
-                    <div className="flex flex-col items-center lg:items-end gap-3 shrink-0 w-full lg:w-auto">
-                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                        <button 
-                          onClick={() => handleUpgrade('monthly')}
-                          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2.5 rounded-full text-sm shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap flex-1 sm:flex-none"
-                        >
-                          {t("premium_upgrade_btn")} (Monthly)
-                        </button>
-                        <button 
-                          onClick={() => handleUpgrade('yearly')}
-                          className="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold px-6 py-2.5 rounded-full text-sm shadow-lg transition-all transform hover:-translate-y-0.5 whitespace-nowrap flex-1 sm:flex-none"
-                        >
-                          {t("premium_upgrade_btn")} (Yearly)
-                        </button>
+                  <div className="mt-8 bg-gradient-to-br from-neutral-800/80 to-neutral-900/80 border border-emerald-500/30 rounded-[2.5rem] p-8 md:p-10 flex flex-col gap-10 transition-all hover:border-emerald-500/50 shadow-2xl shadow-emerald-950/20">
+                    <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+                      <div className="text-center lg:text-left">
+                        <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-black tracking-widest uppercase mb-4 border border-emerald-500/20">
+                          <FaCrown size={12} /> {t("premium_tier")}
+                        </div>
+                        <h4 className="text-white font-extrabold text-3xl md:text-4xl mb-4 leading-tight">
+                          {t("premium_title").replace("🚀 ", "").replace("👑 ", "")}
+                        </h4>
+                        <p className="text-neutral-400 text-sm md:text-base max-w-md leading-relaxed">
+                          {t("premium_profile_desc")}
+                        </p>
                       </div>
-                      <span className="text-xs text-emerald-400/80 font-medium tracking-wide text-center lg:text-right">
-                        {t("premium_monthly")} {t("premium_monthly_sub")} • {t("premium_yearly").replace("or ", "")}
-                      </span>
+
+                      <div className="flex flex-col items-center lg:items-end gap-4 shrink-0 w-full lg:w-auto">
+                        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                          <div className="flex flex-col gap-2 group">
+                            <button 
+                              onClick={() => handleUpgrade('monthly')}
+                              className="bg-neutral-800 hover:bg-neutral-700 text-white font-black px-8 py-4 rounded-2xl text-sm shadow-xl transition-all transform hover:-translate-y-1 active:scale-95 border border-neutral-700 group-hover:border-emerald-500/40"
+                            >
+                              {t("premium_upgrade_btn")} (Monthly)
+                            </button>
+                            <span className="text-[10px] text-center text-neutral-500 font-bold uppercase tracking-wider">{t("premium_monthly")} {t("premium_monthly_sub")}</span>
+                          </div>
+
+                          <div className="flex flex-col gap-2 group relative">
+                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-orange-500 text-black text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-tighter shadow-lg z-10 whitespace-nowrap">
+                              Best Value
+                            </div>
+                            <button 
+                              onClick={() => handleUpgrade('yearly')}
+                              className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-10 py-4 rounded-2xl text-sm shadow-xl shadow-emerald-500/20 transition-all transform hover:-translate-y-1 active:scale-95 border border-emerald-400/30"
+                            >
+                              {t("premium_upgrade_btn")} (Yearly)
+                            </button>
+                            <span className="text-[10px] text-center text-emerald-500 font-bold uppercase tracking-wider">{t("premium_yearly").replace("or ", "")}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 pt-10 border-t border-neutral-800/80">
+                      {/* Monthly List */}
+                      <div className="space-y-6">
+                        <h5 className="text-lg font-extrabold text-neutral-100 flex items-center gap-3">
+                          <div className="w-2 h-8 bg-neutral-700 rounded-full" />
+                          {t("premium_monthly_features_title")}
+                        </h5>
+                        <div className="space-y-4">
+                          {[1, 2, 3, 4].map((idx) => (
+                            <div key={idx} className="flex items-center gap-4 group">
+                              <div className="w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 shrink-0">
+                                <FaCheckCircle size={12} />
+                              </div>
+                              <span className="text-sm text-neutral-400 group-hover:text-neutral-200 transition-colors">
+                                {t(`premium_monthly_benefit_${idx}`)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Yearly List */}
+                      <div className="space-y-6">
+                        <h5 className="text-lg font-extrabold text-emerald-400 flex items-center gap-3">
+                          <div className="w-2 h-8 bg-emerald-500/40 rounded-full" />
+                          {t("premium_yearly_features_title")}
+                        </h5>
+                        <div className="space-y-4">
+                          {[1, 2].map((idx) => (
+                            <div key={idx} className="flex items-center gap-4 group">
+                              <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                                <FaCheckCircle size={12} />
+                              </div>
+                              <span className="text-sm text-neutral-200 font-semibold group-hover:text-white transition-colors">
+                                {t(`premium_yearly_benefit_${idx}`)}
+                              </span>
+                            </div>
+                          ))}
+                          {[3, 4, 5].map((idx) => (
+                            <div key={idx} className="flex items-center justify-between group pt-0.5">
+                              <div className="flex items-center gap-4">
+                                <div className="w-5 h-5 rounded-full bg-neutral-800 flex items-center justify-center text-neutral-600 shrink-0">
+                                  <FaCheckCircle size={12} />
+                                </div>
+                                <span className="text-sm text-neutral-500 group-hover:text-neutral-400 transition-colors italic">
+                                  {t(`premium_yearly_benefit_${idx}`)}
+                                </span>
+                              </div>
+                              <span className="text-[9px] font-black uppercase tracking-tighter bg-neutral-800 text-neutral-600 px-2 py-1 rounded-md mb-0.5">
+                                {t("coming_soon").replace("(", "").replace(")", "")}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
 
-                // Danger zone
+                {/* Danger zone */}
                 {!user?.isAdmin && (
                   <div className="mt-8 pt-8 border-t border-red-900/20">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-red-900/5 border border-red-900/20 rounded-2xl p-6">
@@ -698,7 +772,7 @@ const Profile = () => {
             </motion.div>
           )}
 
-          // Inbox tab (admin)
+          {/* Inbox tab (admin) */}
           {activeTab === 'inbox' && user?.isAdmin && (
             <motion.div key="inbox" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">
@@ -755,7 +829,7 @@ const Profile = () => {
             </motion.div>
           )}
 
-          // Resumes tab
+          {/* Resumes tab */}
           {activeTab === 'resumes' && (
             <motion.div key="resumes" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6">

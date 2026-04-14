@@ -37,7 +37,7 @@ const About = () => {
   return (
     <div className="bg-black text-white relative font-sans overflow-x-hidden">
       
-      // Hero section
+      {/* Hero section */}
       <section className="h-screen flex flex-col items-center justify-center relative px-4 sm:px-6 text-center bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-orange-900/20 via-black to-black">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -66,7 +66,7 @@ const About = () => {
         </motion.div>
       </section>
 
-      // Genesis section
+      {/* Genesis section */}
       <section className="py-32 px-6 md:px-[10vw]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           <motion.div 
@@ -108,7 +108,7 @@ const About = () => {
         </div>
       </section>
 
-      // Professionalism section
+      {/* Professionalism section */}
       <section className="py-32 bg-zinc-950 px-6 md:px-[10vw] border-y border-zinc-900">
         <motion.div 
           className="text-center mb-20"
@@ -156,7 +156,7 @@ const About = () => {
         </div>
       </section>
 
-      // Mission section
+      {/* Mission section */}
       <section className="py-32 px-6 md:px-[10vw]">
         <div className="text-center max-w-4xl mx-auto">
           <motion.div
@@ -196,7 +196,7 @@ const About = () => {
         </div>
       </section>
 
-      // Team section
+      {/* Team section */}
       <section className="py-32 bg-orange-500 px-6 md:px-[10vw] text-black">
         <motion.div 
           className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center"

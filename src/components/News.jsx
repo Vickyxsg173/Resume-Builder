@@ -72,13 +72,16 @@ const News = () => {
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
         {loading ? (
-          // Loading state
-          Array.from({ length: 12 }).map((_, i) => (
-            <NewsSkeleton key={i} />
-          ))
+          <>
+            {/* Loading state */}
+            {Array.from({ length: 12 }).map((_, i) => (
+              <NewsSkeleton key={i} />
+            ))}
+          </>
         ) : (
-          // News content
-          news.slice(0, visibleCount).map((item, index) => (
+          <>
+            {/* News content */}
+            {news.slice(0, visibleCount).map((item, index) => (
             <div
               key={index}
               className="bg-neutral-900 border border-white/5 p-6 rounded-2xl shadow-xl hover:border-orange-500/30 transition-all group flex flex-col justify-between"
@@ -100,8 +103,9 @@ const News = () => {
                 {t("news_read_more")}
               </a>
             </div>
-          ))
-        )}
+          ))}
+        </>
+      )}
       </div>
 
       {!loading && visibleCount < news.length && (

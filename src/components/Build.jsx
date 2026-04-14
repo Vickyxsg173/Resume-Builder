@@ -202,7 +202,7 @@ const Build = () => {
         </button>
       </form>
 
-// UI Output
+  {/* UI Output */}
       {resume && (
         <div className="mt-12 flex flex-col items-center pb-20 w-full overflow-x-auto">
           <div className="w-full max-w-[21cm] flex justify-end gap-3 mb-4 min-w-[320px] px-2">

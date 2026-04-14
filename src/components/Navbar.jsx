@@ -23,13 +23,13 @@ const Navbar = ({ addtoref }) => {
   return (
     <>
       <nav className="z-30 w-full fixed bg-black text-lg text-white flex flex-row justify-between items-center px-[3vw] py-2 shadow-lg backdrop-blur-md bg-opacity-90">
-        // Logo
+        {/* Logo */}
         <div ref={addtoref} className="flex flex-row items-center gap-2">
           <FaClipboardUser size={24} className="text-orange-500" />
           <h1 className="text-xl font-bold tracking-tighter">ResumeBuild</h1>
         </div>
 
-        // Desktop Nav
+        {/* Desktop Nav */}
         <div className="hidden lg:flex flex-row gap-[2vw] items-center">
           <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/" onClick={closeMenu}>{t("home")}</Link>
           <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/Build" onClick={closeMenu}>{t("build")}</Link>
@@ -42,7 +42,7 @@ const Navbar = ({ addtoref }) => {
             <Link ref={addtoref} className="hover:text-orange-500 transition-colors" to="/Profile" onClick={closeMenu}>{t("profile")}</Link>
           )}
 
-          // Language switcher
+          {/* Language switcher */}
           <div className="flex items-center gap-1 text-sm bg-neutral-800 p-1 rounded-lg">
             <button
               onClick={() => { i18n.changeLanguage("en"); localStorage.setItem("lang", "en"); }}
@@ -58,7 +58,7 @@ const Navbar = ({ addtoref }) => {
             </button>
           </div>
 
-          // Auth section
+          {/* Auth section */}
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
               <img
@@ -86,7 +86,7 @@ const Navbar = ({ addtoref }) => {
         </div>
 
 
-        // Mobile Nav
+        {/* Mobile Nav */}
         <div className="flex lg:hidden items-center gap-3">
           {isAuthenticated && (
             <img
@@ -105,7 +105,7 @@ const Navbar = ({ addtoref }) => {
           </button>
         </div>
 
-        // Mobile dropdown
+        {/* Mobile dropdown */}
         {menuOpen && (
           <div className="lg:hidden absolute top-full left-0 w-full bg-black border-t border-neutral-800 flex flex-col px-6 py-4 gap-4 shadow-xl text-base">
             <Link className="hover:text-orange-500 transition-colors py-1" to="/" onClick={closeMenu}>{t("home")}</Link>
@@ -118,7 +118,7 @@ const Navbar = ({ addtoref }) => {
               <Link className="hover:text-orange-500 transition-colors py-1" to="/Profile" onClick={closeMenu}>{t("profile")}</Link>
             )}
 
-            // Language switcher (mobile)
+            {/* Language switcher (mobile) */}
             <div className="flex items-center gap-1 text-sm bg-neutral-800 p-1 rounded-lg w-fit">
               <button
                 onClick={() => { i18n.changeLanguage("en"); localStorage.setItem("lang", "en"); }}
@@ -134,7 +134,7 @@ const Navbar = ({ addtoref }) => {
               </button>
             </div>
 
-            // Auth section (mobile)
+            {/* Auth section (mobile) */}
             {isAuthenticated ? (
               <button
                 onClick={() => { logout(); closeMenu(); }}
@@ -155,7 +155,7 @@ const Navbar = ({ addtoref }) => {
         )}
       </nav>
 
-      // Auth modal
+      {/* Auth modal */}
       {!isAuthenticated && isAuthModalOpen && (
         <AuthGate onClose={() => setIsAuthModalOpen(false)} />
       )}
