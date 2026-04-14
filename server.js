@@ -1043,21 +1043,20 @@ app.delete("/api/admin/messages/:id", ensureAdmin, async (req, res) => {
   }
 });
 
-// Server initialization
 
+// Health check
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 // Production build serving
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "dist")));
 
-  app.get("/:path*", (req, res) => {
+  app.get(/.*/, (req, res) => {
     res.sendFile(path.resolve(__dirname, "dist", "index.html"));
   });
 }
-// Health check
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
-});
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
