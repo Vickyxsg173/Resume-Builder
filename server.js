@@ -331,9 +331,39 @@ app.post("/auth/forgot-password", async (req, res) => {
 
     await user.save();
 
-    // Construct reset URL (Prefer FRONTEND_URL env, but ensure it's correct for prod)
-    const baseUrl = process.env.FRONTEND_URL || `${req.protocol}://${req.get('host')}`;
+    // Construct reset URL (Intelligently detect production URL and protocol)
+    let protocol = req.protocol;
+    // On many hosting providers like Render, req.protocol might be 'http' due to the proxy.
+    // We check X-Forwarded-Proto or force https if in production.
+    if (isProduction || req.headers['x-forwarded-proto'] === 'https') {
+      protocol = 'https';
+    }
+    
+    const baseUrl = process.env.FRONTEND_URL || `${protocol}://${req.get('host')}`;
     const resetUrl = `${baseUrl}/reset-password/${resetToken}`;
+    
+    console.log(`🔑 Password reset initiated for: ${normalizedEmail}`);
+    if (isProduction) {
+      console.log(`🔗 Reset URL generated: ${resetUrl}`);
+    }
+
+    // Email Sending Logic
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error("❌ ERROR: EMAIL_USER or EMAIL_PASS environment variables are missing!");
+      if (isProduction) {
+        return res.status(500).json({ 
+          error: "Email service is not configured on the server. Please contact administrator.",
+          debug: "Missing backend email environment variables"
+        });
+      }
+      // In development, we log the link so you can use it without an email service
+      console.log("------------------------------");
+      console.log("DEVELOPMENT MODE: No email credentials found.");
+      console.log("Reset link:", resetUrl);
+      console.log("------------------------------");
+      return res.json({ success: true, message: "Development: Link logged to server console." });
+    }
+
     const transporter = nodemailer.createTransport({
       service: process.env.EMAIL_SERVICE || 'gmail',
       auth: {
@@ -352,15 +382,17 @@ app.post("/auth/forgot-password", async (req, res) => {
         `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
     };
 
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.log("------------------------------");
-    } else {
+    try {
       await transporter.sendMail(mailOptions);
+      console.log(`📧 Reset email sent to: ${user.email}`);
+    } catch (mailError) {
+      console.error("❌ NodeMailer Error:", mailError);
+      return res.status(500).json({ error: "Failed to send email. There might be a configuration issue." });
     }
 
     res.json({ success: true, message: "If that email exists, a reset link has been sent." });
   } catch (err) {
-    console.error(err);
+    console.error("Forgot Password critical error:", err);
     res.status(500).json({ error: "Failed to process forgot password" });
   }
 });
