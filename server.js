@@ -420,11 +420,6 @@ app.post("/auth/forgot-password", async (req, res) => {
     res.status(500).json({ error: "Failed to process forgot password" });
   }
 });
-  } catch (err) {
-    console.error("Forgot Password critical error:", err);
-    res.status(500).json({ error: "Failed to process forgot password" });
-  }
-});
 
 // Reset password endpoint
 app.post("/auth/reset-password/:token", async (req, res) => {
