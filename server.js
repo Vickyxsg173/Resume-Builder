@@ -369,57 +369,57 @@ app.post("/auth/forgot-password", async (req, res) => {
     const passLen = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim().length : 0;
     console.log(`🔍 Diagnostic: User=${maskedUser} | PassLength=${passLen} | Env=${process.env.NODE_ENV || 'undefined'}`);
 
+    // Email Sending Logic (Standard Nodemailer)
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error("❌ ERROR: EMAIL_USER or EMAIL_PASS environment variables are missing!");
+      if (isProduction) {
+        return res.status(500).json({ 
+          error: "Email service is not configured on the server. Please contact administrator.",
+          debug: "Missing backend email environment variables"
+        });
+      }
+      console.log("------------------------------");
+      console.log("DEVELOPMENT MODE: No email credentials found.");
+      console.log("Reset link:", resetUrl);
+      console.log("------------------------------");
+      return res.json({ success: true, message: "Development: Link logged to server console." });
+    }
+
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,      // Standard Secure Port
-      secure: true,   // true for 465, false for others
-      family: 4,      // Keep forcing IPv4
-      connectionTimeout: 10000, // 10 seconds timeout
-      logger: true,   // ENABLE DETAILED LOGGING
-      debug: true,    // SHOW SMTP CONVERSATION
+      service: 'gmail',
+      family: 4,      // FORCE IPv4 to avoid ENETUNREACH errors
+      logger: true,   // Keep debug logs active for one more test
+      debug: true,
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS?.trim(), 
       },
     });
 
-    // Verification check (Pre-flight)
     try {
-      await transporter.verify();
-      console.log("✅ SMTP Connection verified and ready to send");
-    } catch (verifyError) {
-      console.error("❌ SMTP Verification Failed:", verifyError.message);
-      // In production, we fail early to provide clear feedback
-      if (isProduction) {
-        return res.status(500).json({ 
-          error: "Email service verification failed. Check server logs.",
-          debug: verifyError.message
-        });
-      }
-    }
-
-    const mailOptions = {
-      to: user.email,
-      from: `ResumeBuild <${process.env.EMAIL_USER}>`,
-      subject: 'Password Reset Request',
-      text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
-        `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
-        `${resetUrl}\n\n` +
-        `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
-    };
-
-    try {
-      await transporter.sendMail(mailOptions);
+      await transporter.sendMail({
+        to: user.email,
+        from: `ResumeBuild <${process.env.EMAIL_USER}>`,
+        subject: 'Password Reset Request',
+        text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+          `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
+          `${resetUrl}\n\n` +
+          `If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+      });
       console.log(`📧 Reset email successfully sent to: ${user.email}`);
+      res.json({ success: true, message: "If that email exists, a reset link has been sent." });
     } catch (mailError) {
-      console.error("❌ NodeMailer Send Error:", mailError.message);
-      return res.status(500).json({ 
+      console.error("❌ NodeMailer Error:", mailError.message);
+      res.status(500).json({ 
         error: "Failed to send email. There might be a configuration issue.",
         details: mailError.message
       });
     }
-
-    res.json({ success: true, message: "If that email exists, a reset link has been sent." });
+  } catch (err) {
+    console.error("Forgot Password critical error:", err);
+    res.status(500).json({ error: "Failed to process forgot password" });
+  }
+});
   } catch (err) {
     console.error("Forgot Password critical error:", err);
     res.status(500).json({ error: "Failed to process forgot password" });
