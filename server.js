@@ -365,21 +365,34 @@ app.post("/auth/forgot-password", async (req, res) => {
     }
 
     // Diagnostic Logging (Non-sensitive)
-    if (isProduction) {
-      const maskedUser = process.env.EMAIL_USER ? `${process.env.EMAIL_USER.slice(0, 3)}***${process.env.EMAIL_USER.slice(-4)}` : "MISSING";
-      const passLen = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim().length : 0;
-      console.log(`🔍 Diagnostic: User=${maskedUser} | PassLength=${passLen} | Service=${process.env.EMAIL_SERVICE || 'gmail'}`);
-    }
+    const maskedUser = process.env.EMAIL_USER ? `${process.env.EMAIL_USER.slice(0, 3)}***${process.env.EMAIL_USER.slice(-4)}` : "MISSING";
+    const passLen = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim().length : 0;
+    console.log(`🔍 Diagnostic: User=${maskedUser} | PassLength=${passLen} | Env=${process.env.NODE_ENV || 'undefined'}`);
 
     const transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      port: 587, // Port 587 is often more compatible with cloud hosts
+      secure: false, // TLS true for 465, false for other ports
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS?.trim(), // Ensure no stray spaces
+        pass: process.env.EMAIL_PASS?.trim(), 
       },
     });
+
+    // Verification check (Pre-flight)
+    try {
+      await transporter.verify();
+      console.log("✅ SMTP Connection verified and ready to send");
+    } catch (verifyError) {
+      console.error("❌ SMTP Verification Failed:", verifyError.message);
+      // In production, we fail early to provide clear feedback
+      if (isProduction) {
+        return res.status(500).json({ 
+          error: "Email service verification failed. Check server logs.",
+          debug: verifyError.message
+        });
+      }
+    }
 
     const mailOptions = {
       to: user.email,
@@ -393,10 +406,13 @@ app.post("/auth/forgot-password", async (req, res) => {
 
     try {
       await transporter.sendMail(mailOptions);
-      console.log(`📧 Reset email sent to: ${user.email}`);
+      console.log(`📧 Reset email successfully sent to: ${user.email}`);
     } catch (mailError) {
-      console.error("❌ NodeMailer Error:", mailError);
-      return res.status(500).json({ error: "Failed to send email. There might be a configuration issue." });
+      console.error("❌ NodeMailer Send Error:", mailError.message);
+      return res.status(500).json({ 
+        error: "Failed to send email. There might be a configuration issue.",
+        details: mailError.message
+      });
     }
 
     res.json({ success: true, message: "If that email exists, a reset link has been sent." });
