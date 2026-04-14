@@ -632,6 +632,7 @@ app.post("/payment/create-order", ensureAuth, async (req, res) => {
   if (!razorpay) {
     return res.status(503).json({ error: "Payment gateway is not configured" });
   }
+  const { plan } = req.body;
   const amount = plan === "monthly" ? 19900 : 229900;
 
   try {
@@ -1060,6 +1061,6 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server ready on http://127.0.0.1:${PORT}`);
 });

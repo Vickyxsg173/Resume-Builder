@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': 'http://localhost:5000',
-      '/auth': 'http://localhost:5000',
-      '/generate-resume': 'http://localhost:5000',
-      '/payment': 'http://localhost:5000',
+      '/api': 'http://127.0.0.1:5000',
+      '/auth': 'http://127.0.0.1:5000',
+      '/generate-resume': 'http://127.0.0.1:5000',
+      '/payment': 'http://127.0.0.1:5000',
     }
   },
   build: {
