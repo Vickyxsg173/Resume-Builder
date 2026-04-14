@@ -373,6 +373,7 @@ app.post("/auth/forgot-password", async (req, res) => {
       host: 'smtp.gmail.com',
       port: 587, // Port 587 is often more compatible with cloud hosts
       secure: false, // TLS true for 465, false for other ports
+      family: 4,     // FORCE IPv4 to avoid ENETUNREACH errors on cloud providers
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS?.trim(), 
