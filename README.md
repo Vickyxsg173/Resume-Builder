@@ -1,6 +1,6 @@
-# 📄 Resume Builder
+# 📄 HireForge — AI-Powered Resume Builder
 
-A full-stack AI-powered Resume Builder web application built with **React + Vite** and **Express.js**. It lets users create, customize, and export professional resumes with AI assistance, multilingual support, voice input, interview preparation, job news, and payment integration.
+A full-stack AI-powered Resume Builder web application built with **React 19 + Vite 8** and **Express 5**. It lets users create, customize, and export professional resumes with AI assistance, multilingual support, voice input, interview preparation, job news, and payment integration.
 
 ---
 
@@ -27,28 +27,12 @@ A full-stack AI-powered Resume Builder web application built with **React + Vite
 > <img width="1658" height="883" alt="image" src="https://github.com/user-attachments/assets/6ff99b10-f49b-4957-a1a3-2d7c980c6e2a" />
 > <img width="1658" height="888" alt="image" src="https://github.com/user-attachments/assets/5aac95a1-c540-479b-a563-698ab0251533" />
 > <img width="1663" height="893" alt="image" src="https://github.com/user-attachments/assets/31c71b02-83e7-48c7-aece-2bc8622912bb" />
+> <img width="1650" height="887" alt="image" src="https://github.com/user-attachments/assets/5993075c-2b94-442f-bc44-8a38dc575e03" />
 > <img width="1663" height="882" alt="image" src="https://github.com/user-attachments/assets/4d6bd967-0880-4329-a76c-f6a06d03d8d5" />
 > <img width="1668" height="892" alt="image" src="https://github.com/user-attachments/assets/11743c33-d1e7-4ef4-86bc-751d672fc3a2" />
-> <img width="1663" height="882" alt="image" src="https://github.com/user-attachments/assets/cc7c589e-365a-4949-aafd-d210def8d6b2" />
 > <img width="1660" height="890" alt="image" src="https://github.com/user-attachments/assets/45a0a85b-9a47-4fe0-9051-413c8354e295" />
 > <img width="1666" height="886" alt="image" src="https://github.com/user-attachments/assets/8123bac7-0da5-4844-95e4-2e1a9aca2cb2" />
 > <img width="1654" height="883" alt="image" src="https://github.com/user-attachments/assets/a7c1172d-21dd-419e-ad58-f45cd2f6f9f7" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ---
 
@@ -58,7 +42,7 @@ A full-stack AI-powered Resume Builder web application built with **React + Vite
 - Email/password signup and login with **Passport.js** (local strategy)
 - **Google OAuth 2.0** login (`passport-google-oauth20`)
 - Protected routes — unauthenticated users are redirected via `AuthGate` and `ProtectedRoute`
-- Password reset via email using **Nodemailer**
+- Password reset via email using **SendGrid** (`@sendgrid/mail`)
 - Session management with **express-session** + **connect-mongo**
 - Password hashing with **bcryptjs**
 
@@ -75,7 +59,7 @@ A full-stack AI-powered Resume Builder web application built with **React + Vite
 
 ### 🎙️ Voice Input
 - Fill in resume fields using your voice with **react-speech-recognition**
-- Hands-free resume creation experience
+- Hands-free resume creation experience (requires `regenerator-runtime` polyfill)
 
 ### 🌐 Multilingual Support (i18n)
 - Full internationalization using **i18next** and **react-i18next**
@@ -93,7 +77,8 @@ A full-stack AI-powered Resume Builder web application built with **React + Vite
 - Premium features unlocked via **Razorpay** payment gateway
 
 ### 👤 User Profile
-- View and update your profile information
+- Redesigned profile UI with a modern, polished layout
+- View and update your profile information (name, email, avatar, and more)
 - Manage your saved resume data
 
 ### 🛡️ Security
@@ -107,44 +92,45 @@ A full-stack AI-powered Resume Builder web application built with **React + Vite
 ## 🛠️ Tech Stack
 
 ### Frontend
-| Technology | Purpose |
-|---|---|
-| React 18 | UI framework |
-| Vite | Build tool & dev server |
-| Tailwind CSS | Utility-first styling |
-| Framer Motion | Animations |
-| GSAP | Advanced animations |
-| React Router DOM | Client-side routing |
-| react-i18next | Internationalization |
-| react-speech-recognition | Voice input |
-| react-markdown | Markdown rendering |
-| react-icons | Icon library |
-| html2pdf.js | PDF export |
-| Axios | HTTP client |
+| Technology | Version | Purpose |
+|---|---|---|
+| React | 19 | UI framework |
+| Vite | 8 | Build tool & dev server |
+| React Router DOM | 7 | Client-side routing |
+| Tailwind CSS | 3 | Utility-first styling |
+| Framer Motion | 12 | Animations |
+| GSAP | 3 | Advanced animations |
+| react-i18next | 16 | Internationalization |
+| react-speech-recognition | 4 | Voice input |
+| regenerator-runtime | 0.14 | Async/generator polyfill for voice |
+| react-markdown | 10 | Markdown rendering |
+| react-icons | 5 | Icon library |
+| html2pdf.js | 0.14 | PDF export |
+| Axios | 1 | HTTP client |
 
 ### Backend
-| Technology | Purpose |
-|---|---|
-| Express.js | Web server framework |
-| Mongoose | MongoDB ODM |
-| Passport.js | Authentication middleware |
-| passport-local | Email/password auth strategy |
-| passport-google-oauth20 | Google OAuth strategy |
-| express-session | Session management |
-| connect-mongo | MongoDB session store |
-| bcryptjs | Password hashing |
-| Nodemailer | Email service (password reset) |
-| Multer | File upload handling |
-| Helmet | Security headers |
-| express-rate-limit | API rate limiting |
-| CORS | Cross-origin resource sharing |
-| dotenv | Environment variable management |
+| Technology | Version | Purpose |
+|---|---|---|
+| Express.js | 5 | Web server framework |
+| Mongoose | 9 | MongoDB ODM |
+| Passport.js | 0.7 | Authentication middleware |
+| passport-local | 1 | Email/password auth strategy |
+| passport-google-oauth20 | 2 | Google OAuth strategy |
+| express-session | 1 | Session management |
+| connect-mongo | 5 | MongoDB session store |
+| bcryptjs | 3 | Password hashing |
+| SendGrid (`@sendgrid/mail`) | — | Transactional email (password reset) |
+| Multer | 1 | File upload handling |
+| Helmet | 8 | Security headers |
+| express-rate-limit | 8 | API rate limiting |
+| CORS | 2 | Cross-origin resource sharing |
+| dotenv | 17 | Environment variable management |
 
 ### AI & Services
 | Technology | Purpose |
 |---|---|
-| OpenRouter SDK | AI resume generation & chat |
-| Supabase | Additional database & storage |
+| OpenRouter SDK (`@openrouter/sdk`) | AI resume generation & chat |
+| Supabase (`@supabase/supabase-js`) | Additional database & storage |
 | Razorpay | Payment gateway |
 
 ---
@@ -205,7 +191,7 @@ Resume-Builder/
 - An **OpenRouter** API key
 - A **Google OAuth** client ID and secret
 - A **Razorpay** key ID and secret
-- A **Nodemailer**-compatible email account (e.g., Gmail with app password)
+- A **SendGrid** API key (for password reset emails)
 
 ### Installation
 
@@ -237,9 +223,9 @@ Resume-Builder/
    GOOGLE_CLIENT_SECRET=your_google_client_secret
    GOOGLE_CALLBACK_URL=http://localhost:5000/auth/google/callback
 
-   # Nodemailer (email)
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASS=your_email_app_password
+   # SendGrid (email)
+   SENDGRID_API_KEY=your_sendgrid_api_key
+   SENDGRID_FROM_EMAIL=your_verified_sender@example.com
 
    # OpenRouter AI
    OPENROUTER_API_KEY=your_openrouter_api_key
@@ -284,7 +270,7 @@ npm run preview
 | `npm run build` | Build for production |
 | `npm run preview` | Preview production build |
 | `npm run lint` | Run ESLint |
-| `npm start` | Start the Express backend server |
+| `npm start` | Start the Express backend server (`node server.js`) |
 
 ---
 
@@ -305,8 +291,6 @@ npm run preview
 | POST | `/api/ai/generate` | Generate AI resume content |
 | POST | `/api/payment/order` | Create Razorpay payment order |
 | POST | `/api/payment/verify` | Verify Razorpay payment |
-
-> _Update this table to match your actual route definitions in `server.js`_
 
 ---
 
@@ -330,7 +314,7 @@ Contributions are welcome! Please follow these steps:
 
 ## 📄 License
 
-This project is open source. Add your chosen license here (e.g., MIT).
+This project is licensed under the ISC License.
 
 ---
 
@@ -344,6 +328,7 @@ This project is open source. Add your chosen license here (e.g., MIT).
 ## 🙏 Acknowledgements
 
 - [OpenRouter](https://openrouter.ai/) for AI API access
+- [SendGrid](https://sendgrid.com/) for transactional email delivery
 - [Supabase](https://supabase.com/) for backend-as-a-service
 - [Razorpay](https://razorpay.com/) for payment processing
 - [Tailwind CSS](https://tailwindcss.com/) for utility-first styling
