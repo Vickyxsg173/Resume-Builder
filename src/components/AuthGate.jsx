@@ -196,18 +196,22 @@ const AuthGate = ({ onClose, initialMode = "google" }) => {
     </form>
   );
 
-  const renderForgotPassword = () => (
     <form onSubmit={handleForgotPassword} className="flex flex-col gap-4 w-full">
-      <div className="relative">
-        <RiMailLine className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
-        <input
-          type="email"
-          placeholder="Enter your email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
-        />
+      <div className="flex flex-col gap-2">
+        <p className="text-[10px] text-orange-400/70 text-center uppercase tracking-widest font-bold">
+          Quick Tip: Check your spam folder if you don't see it!
+        </p>
+        <div className="relative">
+          <RiMailLine className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500" size={18} />
+          <input
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all"
+          />
+        </div>
       </div>
 
       {error && <p className="text-red-400 text-xs text-center">{error}</p>}

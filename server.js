@@ -380,13 +380,30 @@ app.post("/auth/forgot-password", async (req, res) => {
           personalizations: [{ to: [{ email: user.email }] }],
           from: { email: process.env.EMAIL_FROM || process.env.EMAIL_USER, name: 'ResumeBuild' },
           subject: 'Password Reset Request',
-          content: [{
-            type: 'text/plain',
-            value: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
-                   `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
-                   `${resetUrl}\n\n` +
-                   `If you did not request this, please ignore this email and your password will remain unchanged.\n`
-          }]
+          content: [
+            {
+              type: 'text/plain',
+              value: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+                     `Please click on the following link to complete the process:\n\n` +
+                     `${resetUrl}\n\n` +
+                     `If you did not request this, please ignore this email.\n`
+            },
+            {
+              type: 'text/html',
+              value: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">` +
+                     `<h2 style="color: #f97316;">Password Reset Request</h2>` +
+                     `<p>You are receiving this because you (or someone else) have requested the reset of the password for your account.</p>` +
+                     `<p>Please click the button below to complete the process:</p>` +
+                     `<div style="text-align: center; margin: 30px 0;">` +
+                     `<a href="${resetUrl}" style="background-color: #f97316; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Reset Password</a>` +
+                     `</div>` +
+                     `<p style="font-size: 12px; color: #666;">If the button above doesn't work, copy and paste this link into your browser:</p>` +
+                     `<p style="font-size: 12px; color: #f97316; word-break: break-all;">${resetUrl}</p>` +
+                     `<hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />` +
+                     `<p style="font-size: 11px; color: #999;">If you did not request this, please ignore this email and your password will remain unchanged.</p>` +
+                     `</div>`
+            }
+          ]
         }, {
           headers: {
             'Authorization': `Bearer ${process.env.SENDGRID_API_KEY}`,
